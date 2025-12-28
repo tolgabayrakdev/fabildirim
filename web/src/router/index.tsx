@@ -4,6 +4,7 @@ import SignUp from "@/pages/auth/sign-up";
 
 import DashboardLayout from "@/layouts/dashboard-layout";
 import Settings from "@/pages/dashboard/settings";
+import ForgotPassword from "@/pages/auth/forgot-password";
 
 
 export const router = createBrowserRouter([
@@ -25,5 +26,9 @@ export const router = createBrowserRouter([
     {
         path: "/sign-up",
         element: <SignUp />
+    },
+    {
+        path: "/forgot-password",
+        element: <ForgotPassword />
     }
 ]);
