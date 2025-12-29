@@ -28,7 +28,7 @@ export default function SignUp() {
     return (
         <div className="min-h-screen flex">
             {/* Sol Taraf - Fabildirim İçeriği (Kayıt) */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-12">
+            <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-12">
                 <div className="max-w-md space-y-8">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
