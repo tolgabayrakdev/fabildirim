@@ -355,4 +355,41 @@ export default class AuthService {
             created_at: user.created_at,
         };
     }
+
+    async changePassword(userId, currentPassword, newPassword) {
+        const user = await this.authRepository.findById(userId);
+        if (!user) {
+            throw new HttpException(404, "Kullanıcı bulunamadı.");
+        }
+
+        // Mevcut şifreyi doğrula
+        const isPasswordValid = await comparePassword(currentPassword, user.password);
+        if (!isPasswordValid) {
+            throw new HttpException(401, "Mevcut şifre yanlış.");
+        }
+
+        // Yeni şifre mevcut şifre ile aynı olamaz
+        const isSamePassword = await comparePassword(newPassword, user.password);
+        if (isSamePassword) {
+            throw new HttpException(400, "Yeni şifre mevcut şifre ile aynı olamaz.");
+        }
+
+        // Yeni şifreyi hashle ve güncelle
+        const hashedPassword = await hashPassword(newPassword);
+        await this.authRepository.updatePassword(userId, hashedPassword);
+
+        return { message: "Şifreniz başarıyla değiştirildi." };
+    }
+
+    async deleteAccount(userId) {
+        const user = await this.authRepository.findById(userId);
+        if (!user) {
+            throw new HttpException(404, "Kullanıcı bulunamadı.");
+        }
+
+        // Kullanıcıyı sil (CASCADE ile ilişkili veriler de silinecek)
+        await this.authRepository.deleteUser(userId);
+
+        return { message: "Hesabınız başarıyla silindi." };
+    }
 }

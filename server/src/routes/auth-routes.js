@@ -12,6 +12,7 @@ import {
     verifySmsOtpSchema,
     resendEmailVerificationSchema,
     resendSmsVerificationSchema,
+    changePasswordSchema,
 } from "../schema/auth-schema.js";
 
 const router = express.Router();
@@ -63,6 +64,17 @@ router.get(
     "/me",
     verifyToken,
     authController.getCurrentUser.bind(authController)
+);
+router.post(
+    "/change-password",
+    verifyToken,
+    schemaValidation(changePasswordSchema),
+    authController.changePassword.bind(authController)
+);
+router.delete(
+    "/delete-account",
+    verifyToken,
+    authController.deleteAccount.bind(authController)
 );
 
 export default router;

@@ -215,4 +215,36 @@ export default class AuthController {
             next(error);
         }
     }
+
+    async changePassword(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const { currentPassword, newPassword } = req.body;
+            const result = await this.authService.changePassword(userId, currentPassword, newPassword);
+            res.status(200).json({
+                success: true,
+                message: result.message,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteAccount(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const result = await this.authService.deleteAccount(userId);
+            
+            // Cookie'leri temizle
+            res.clearCookie("access_token");
+            res.clearCookie("refresh_token");
+            
+            res.status(200).json({
+                success: true,
+                message: result.message,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

@@ -139,3 +139,23 @@ export const resendSmsVerificationSchema = Joi.object({
         "any.required": "E-posta alanı zorunludur",
     }),
 });
+
+export const changePasswordSchema = Joi.object({
+    currentPassword: Joi.string().required().messages({
+        "string.empty": "Mevcut şifre alanı boş bırakılamaz",
+        "any.required": "Mevcut şifre alanı zorunludur",
+    }),
+    newPassword: Joi.string()
+        .min(8)
+        .max(100)
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+        .required()
+        .messages({
+            "string.empty": "Yeni şifre alanı boş bırakılamaz",
+            "string.min": "Yeni şifre en az 8 karakter olmalıdır",
+            "string.max": "Yeni şifre en fazla 100 karakter olabilir",
+            "string.pattern.base":
+                "Yeni şifre en az bir küçük harf, bir büyük harf ve bir rakam içermelidir",
+            "any.required": "Yeni şifre alanı zorunludur",
+        }),
+});

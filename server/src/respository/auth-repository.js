@@ -243,4 +243,10 @@ export default class AuthRepository {
         // Eğer secondsSince negatif veya tutarsızsa (veri hatası), göndermeye izin ver
         return { canResend: true };
     }
+
+    async deleteUser(userId, client = null) {
+        const dbClient = client || pool;
+        const query = `DELETE FROM users WHERE id = $1`;
+        await dbClient.query(query, [userId]);
+    }
 }
