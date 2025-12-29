@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import config from "./config/app-config.js";
 import logger from "./config/logger.js";
 import errorHandler from "./middleware/error-handler.js";
@@ -31,6 +32,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.get("/", (_req, res) => {
     res.json({

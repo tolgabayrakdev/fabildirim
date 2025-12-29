@@ -339,4 +339,23 @@ export default class AuthService {
             maskedPhone,
         };
     }
+
+    async getCurrentUser(userId) {
+        const user = await this.authRepository.findById(userId);
+        if (!user) {
+            throw new HttpException(404, "Kullanıcı bulunamadı.");
+        }
+
+        // Hassas bilgileri kaldır ve frontend formatına dönüştür
+        // Not: id UUID olarak döndürülüyor, frontend'de string olarak kullanılabilir
+        return {
+            id: user.id,
+            email: user.email,
+            name: `${user.first_name} ${user.last_name}`,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            phone: user.phone,
+            created_at: user.created_at,
+        };
+    }
 }

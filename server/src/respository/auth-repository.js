@@ -1,6 +1,13 @@
 import pool from "../config/database.js";
 
 export default class AuthRepository {
+    async findById(userId, client = null) {
+        const dbClient = client || pool;
+        const query = `SELECT * FROM users WHERE id = $1`;
+        const result = await dbClient.query(query, [userId]);
+        return result.rows[0];
+    }
+
     async findByEmail(email) {
         const query = `SELECT * FROM users WHERE email = $1`;
         const result = await pool.query(query, [email]);

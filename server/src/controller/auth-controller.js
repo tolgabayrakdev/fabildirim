@@ -202,4 +202,17 @@ export default class AuthController {
             next(error);
         }
     }
+
+    async getCurrentUser(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const user = await this.authService.getCurrentUser(userId);
+            res.status(200).json({
+                success: true,
+                data: user,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

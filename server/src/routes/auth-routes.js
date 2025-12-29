@@ -1,6 +1,7 @@
 import express from "express";
 import AuthController from "../controller/auth-controller.js";
 import { schemaValidation } from "../middleware/schema-validation.js";
+import { verifyToken } from "../middleware/auth-middleware.js";
 import {
     signUpSchema,
     signInSchema,
@@ -57,6 +58,11 @@ router.post(
     "/resend-sms-verification",
     schemaValidation(resendSmsVerificationSchema),
     authController.resendSmsVerification.bind(authController)
+);
+router.get(
+    "/me",
+    verifyToken,
+    authController.getCurrentUser.bind(authController)
 );
 
 export default router;
