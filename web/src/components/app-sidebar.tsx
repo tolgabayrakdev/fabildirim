@@ -1,6 +1,7 @@
 import { Home, LogOut, Search, Settings, User } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router"
 import { useAuthStore } from "@/store/auth-store"
+import { ModeToggle } from "@/components/mode-toggle"
 import {
   Sidebar,
   SidebarContent,
@@ -79,12 +80,12 @@ export function AppSidebar() {
                       isActive={isActive}
                       className={cn(
                         "relative transition-all",
-                        isActive && "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-8 before:w-1 before:bg-primary before:rounded-r-full before:shadow-sm"
+                        isActive && "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-8 before:w-1 before:bg-primary"
                       )}
                     >
-                      <Link to={item.url} className="flex items-center gap-2 w-full">
-                        <item.icon className={cn("transition-colors", isActive && "text-primary")} />
-                        <span className={cn(isActive && "font-semibold")}>{item.title}</span>
+                      <Link to={item.url} className="flex items-center gap-3 w-full">
+                        <item.icon className={cn("h-5 w-5 transition-colors", isActive && "text-primary")} />
+                        <span className={cn("text-[15px]", isActive && "font-semibold")}>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -99,6 +100,11 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <div className="flex items-center justify-center w-full py-2">
+                  <ModeToggle />
+                </div>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 {loading ? (
                   <SidebarMenuButton className="w-full justify-start h-auto py-2 px-2" disabled>
