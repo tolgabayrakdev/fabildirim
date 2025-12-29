@@ -102,7 +102,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({
         user: null,
         loading: false,
-        error: "Kimlik doğrulama başarısız",
+        error: null,
       });
       return false;
     }
@@ -146,13 +146,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         await get().checkAuth();
         return { success: true };
       } else {
+        const errorMessage = data.message || data.error?.message || "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.";
         set({
           loading: false,
-          error: data.error?.message || "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.",
+          error: errorMessage,
         });
         return {
           success: false,
-          error: data.error?.message || "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.",
+          error: errorMessage,
         };
       }
     } catch (err) {
@@ -198,13 +199,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         await get().checkAuth();
         return { success: true };
       } else {
+        const errorMessage = data.message || data.error?.message || "Doğrulama kodu geçersiz.";
         set({
           loading: false,
-          error: data.error?.message || "Doğrulama kodu geçersiz.",
+          error: errorMessage,
         });
         return {
           success: false,
-          error: data.error?.message || "Doğrulama kodu geçersiz.",
+          error: errorMessage,
         };
       }
     } catch (err) {
@@ -240,13 +242,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         await get().checkAuth();
         return { success: true };
       } else {
+        const errorMessage = data.message || data.error?.message || "Doğrulama kodu geçersiz.";
         set({
           loading: false,
-          error: data.error?.message || "Doğrulama kodu geçersiz.",
+          error: errorMessage,
         });
         return {
           success: false,
-          error: data.error?.message || "Doğrulama kodu geçersiz.",
+          error: errorMessage,
         };
       }
     } catch (err) {
@@ -285,13 +288,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           remainingSeconds: data.data?.remainingSeconds || 180
         };
       } else {
+        const errorMessage = data.message || data.error?.message || "E-posta gönderilemedi.";
         set({
           loading: false,
-          error: data.error?.message || "E-posta gönderilemedi.",
+          error: errorMessage,
         });
         return {
           success: false,
-          error: data.error?.message || "E-posta gönderilemedi.",
+          error: errorMessage,
         };
       }
     } catch (err) {
@@ -330,13 +334,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           maskedPhone: data.data?.maskedPhone,
         };
       } else {
+        const errorMessage = data.message || data.error?.message || "SMS gönderilemedi.";
         set({
           loading: false,
-          error: data.error?.message || "SMS gönderilemedi.",
+          error: errorMessage,
         });
         return {
           success: false,
-          error: data.error?.message || "SMS gönderilemedi.",
+          error: errorMessage,
         };
       }
     } catch (err) {
@@ -383,13 +388,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ loading: false });
         return { success: true };
       } else {
+        const errorMessage = data.message || data.error?.message || "Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.";
         set({
           loading: false,
-          error: data.error?.message || "Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.",
+          error: errorMessage,
         });
         return {
           success: false,
-          error: data.error?.message || "Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.",
+          error: errorMessage,
         };
       }
     } catch (err) {
