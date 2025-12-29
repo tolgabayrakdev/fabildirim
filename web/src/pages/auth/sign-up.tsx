@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Link } from "react-router"
+import { useState, useEffect } from "react"
+import { Link, useNavigate } from "react-router"
 import { Eye, EyeOff, Bell, Zap, Shield, Sparkles, CheckCircle, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button"
 import { useAuthStore } from "@/store/auth-store"
 
 export default function SignUp() {
-    const { signUp, error } = useAuthStore()
+    const navigate = useNavigate()
+    const { signUp, checkAuth, loading: authLoading, error } = useAuthStore()
+    const [checkingAuth, setCheckingAuth] = useState(true)
 
     const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
@@ -82,6 +84,33 @@ export default function SignUp() {
         } else {
             setFormError(result.error || "Kayıt başarısız. Lütfen tekrar deneyin.")
         }
+    }
+
+    // Auth kontrolü - eğer zaten giriş yapmışsa ana sayfaya yönlendir
+    useEffect(() => {
+        const checkAuthentication = async () => {
+            const isAuthenticated = await checkAuth()
+            if (isAuthenticated) {
+                navigate("/", { replace: true })
+            } else {
+                setCheckingAuth(false)
+            }
+        }
+        checkAuthentication()
+    }, [checkAuth, navigate])
+
+    // Auth kontrolü yapılırken loading göster
+    if (checkingAuth || authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center animate-pulse">
+                        <Bell className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="text-muted-foreground">Yükleniyor...</div>
+                </div>
+            </div>
+        )
     }
 
     // Başarı ekranı

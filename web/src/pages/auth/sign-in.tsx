@@ -18,9 +18,12 @@ export default function SignIn() {
         verifySmsOtp, 
         resendEmailVerification, 
         resendSmsVerification,
+        checkAuth,
+        loading: authLoading,
         error 
     } = useAuthStore()
 
+    const [checkingAuth, setCheckingAuth] = useState(true)
     const [step, setStep] = useState<Step>("login")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -64,6 +67,19 @@ export default function SignIn() {
             }
         }
     }, [])
+
+    // Auth kontrolü - eğer zaten giriş yapmışsa ana sayfaya yönlendir
+    useEffect(() => {
+        const checkAuthentication = async () => {
+            const isAuthenticated = await checkAuth()
+            if (isAuthenticated) {
+                navigate("/", { replace: true })
+            } else {
+                setCheckingAuth(false)
+            }
+        }
+        checkAuthentication()
+    }, [checkAuth, navigate])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -132,6 +148,20 @@ export default function SignIn() {
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
         return `${mins}:${secs.toString().padStart(2, "0")}`
+    }
+
+    // Auth kontrolü yapılırken loading göster
+    if (checkingAuth || authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center animate-pulse">
+                        <Bell className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="text-muted-foreground">Yükleniyor...</div>
+                </div>
+            </div>
+        )
     }
 
     return (
