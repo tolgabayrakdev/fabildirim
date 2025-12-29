@@ -5,6 +5,7 @@ import SignUp from "@/pages/auth/sign-up";
 import DashboardLayout from "@/layouts/dashboard-layout";
 import Settings from "@/pages/dashboard/settings";
 import ForgotPassword from "@/pages/auth/forgot-password";
+import ResetPassword from "@/pages/auth/reset-password";
 
 
 export const router = createBrowserRouter([
@@ -30,5 +31,9 @@ export const router = createBrowserRouter([
     {
         path: "/forgot-password",
         element: <ForgotPassword />
+    },
+    {
+        path: "/reset-password",
+        element: <ResetPassword />
     }
 ]);

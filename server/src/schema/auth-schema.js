@@ -52,3 +52,90 @@ export const signInSchema = Joi.object({
         "any.required": "Şifre alanı zorunludur",
     }),
 });
+
+export const forgotPasswordSchema = Joi.object({
+    email: Joi.string().email().required().messages({
+        "string.empty": "E-posta alanı boş bırakılamaz",
+        "string.email": "Geçerli bir e-posta adresi giriniz",
+        "any.required": "E-posta alanı zorunludur",
+    }),
+});
+
+export const verifyResetTokenSchema = Joi.object({
+    token: Joi.string().required().messages({
+        "string.empty": "Token alanı boş bırakılamaz",
+        "any.required": "Token alanı zorunludur",
+    }),
+});
+
+export const resetPasswordSchema = Joi.object({
+    token: Joi.string().required().messages({
+        "string.empty": "Token alanı boş bırakılamaz",
+        "any.required": "Token alanı zorunludur",
+    }),
+    password: Joi.string()
+        .min(8)
+        .max(100)
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+        .required()
+        .messages({
+            "string.empty": "Şifre alanı boş bırakılamaz",
+            "string.min": "Şifre en az 8 karakter olmalıdır",
+            "string.max": "Şifre en fazla 100 karakter olabilir",
+            "string.pattern.base":
+                "Şifre en az bir küçük harf, bir büyük harf ve bir rakam içermelidir",
+            "any.required": "Şifre alanı zorunludur",
+        }),
+});
+
+export const verifyEmailOtpSchema = Joi.object({
+    email: Joi.string().email().required().messages({
+        "string.empty": "E-posta alanı boş bırakılamaz",
+        "string.email": "Geçerli bir e-posta adresi giriniz",
+        "any.required": "E-posta alanı zorunludur",
+    }),
+    code: Joi.string()
+        .length(6)
+        .pattern(/^\d+$/)
+        .required()
+        .messages({
+            "string.empty": "Doğrulama kodu boş bırakılamaz",
+            "string.length": "Doğrulama kodu 6 haneli olmalıdır",
+            "string.pattern.base": "Doğrulama kodu sadece rakamlardan oluşmalıdır",
+            "any.required": "Doğrulama kodu zorunludur",
+        }),
+});
+
+export const verifySmsOtpSchema = Joi.object({
+    email: Joi.string().email().required().messages({
+        "string.empty": "E-posta alanı boş bırakılamaz",
+        "string.email": "Geçerli bir e-posta adresi giriniz",
+        "any.required": "E-posta alanı zorunludur",
+    }),
+    code: Joi.string()
+        .length(6)
+        .pattern(/^\d+$/)
+        .required()
+        .messages({
+            "string.empty": "Doğrulama kodu boş bırakılamaz",
+            "string.length": "Doğrulama kodu 6 haneli olmalıdır",
+            "string.pattern.base": "Doğrulama kodu sadece rakamlardan oluşmalıdır",
+            "any.required": "Doğrulama kodu zorunludur",
+        }),
+});
+
+export const resendEmailVerificationSchema = Joi.object({
+    email: Joi.string().email().required().messages({
+        "string.empty": "E-posta alanı boş bırakılamaz",
+        "string.email": "Geçerli bir e-posta adresi giriniz",
+        "any.required": "E-posta alanı zorunludur",
+    }),
+});
+
+export const resendSmsVerificationSchema = Joi.object({
+    email: Joi.string().email().required().messages({
+        "string.empty": "E-posta alanı boş bırakılamaz",
+        "string.email": "Geçerli bir e-posta adresi giriniz",
+        "any.required": "E-posta alanı zorunludur",
+    }),
+});

@@ -24,6 +24,23 @@ export default class AuthController {
             const { email, password } = req.body;
             const result = await this.authService.signIn(email, password);
 
+            // Eğer email veya SMS doğrulaması gerekiyorsa
+            if (result.emailRequired || result.smsRequired) {
+                return res.status(200).json({
+                    success: true,
+                    message: result.emailRequired
+                        ? "E-posta doğrulaması gerekiyor."
+                        : "SMS doğrulaması gerekiyor.",
+                    data: {
+                        emailRequired: result.emailRequired || false,
+                        smsRequired: result.smsRequired || false,
+                        email: result.email,
+                        maskedPhone: result.maskedPhone,
+                    },
+                });
+            }
+
+            // Normal giriş başarılı, token'ları cookie'ye kaydet
             res.cookie("access_token", result.accessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
@@ -50,6 +67,136 @@ export default class AuthController {
             res.status(200).json({
                 success: true,
                 message: "Çıkış işlemi başarılıyla gerçekleştirildi.",
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async forgotPassword(req, res, next) {
+        try {
+            const { email } = req.body;
+            const result = await this.authService.forgotPassword(email);
+            res.status(200).json({
+                success: true,
+                message: result.message,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async verifyResetToken(req, res, next) {
+        try {
+            const { token } = req.body;
+            const result = await this.authService.verifyResetToken(token);
+            res.status(200).json({
+                success: true,
+                message: result.message,
+                data: {
+                    valid: result.valid,
+                    email: result.email,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async resetPassword(req, res, next) {
+        try {
+            const { token, password } = req.body;
+            const result = await this.authService.resetPassword(token, password);
+            res.status(200).json({
+                success: true,
+                message: result.message,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async verifyEmailOtp(req, res, next) {
+        try {
+            const { email, code } = req.body;
+            const result = await this.authService.verifyEmailOtp(email, code);
+            
+            // Eğer token döndüyse, cookie'ye kaydet
+            if (result.accessToken && result.refreshToken) {
+                res.cookie("access_token", result.accessToken, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "none",
+                });
+                res.cookie("refresh_token", result.refreshToken, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "none",
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                message: result.message,
+                data: {
+                    requiresSmsVerification: result.requiresSmsVerification,
+                    maskedPhone: result.maskedPhone,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async verifySmsOtp(req, res, next) {
+        try {
+            const { email, code } = req.body;
+            const result = await this.authService.verifySmsOtp(email, code);
+            
+            // Token'ları cookie'ye kaydet
+            res.cookie("access_token", result.accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "none",
+            });
+            res.cookie("refresh_token", result.refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "none",
+            });
+
+            res.status(200).json({
+                success: true,
+                message: result.message,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async resendEmailVerification(req, res, next) {
+        try {
+            const { email } = req.body;
+            const result = await this.authService.resendEmailVerification(email);
+            res.status(200).json({
+                success: true,
+                message: result.message,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async resendSmsVerification(req, res, next) {
+        try {
+            const { email } = req.body;
+            const result = await this.authService.resendSmsVerification(email);
+            res.status(200).json({
+                success: true,
+                message: result.message,
+                data: {
+                    maskedPhone: result.maskedPhone,
+                },
             });
         } catch (error) {
             next(error);

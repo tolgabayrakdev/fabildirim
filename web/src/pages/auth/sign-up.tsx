@@ -1,28 +1,118 @@
 import { useState } from "react"
 import { Link } from "react-router"
-import { Eye, EyeOff, Bell, Zap, Shield, Sparkles } from "lucide-react"
+import { Eye, EyeOff, Bell, Zap, Shield, Sparkles, CheckCircle, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { useAuthStore } from "@/store/auth-store"
 
 export default function SignUp() {
-    const [name, setName] = useState("")
+    const { signUp, error } = useAuthStore()
+
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
     const [email, setEmail] = useState("")
+    const [phone, setPhone] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+    const [isSuccess, setIsSuccess] = useState(false)
+    const [formError, setFormError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+
+    const formatPhoneNumber = (value: string) => {
+        // Sadece rakamları al (10 haneli)
+        const numbers = value.replace(/\D/g, "").slice(0, 10)
+        
+        // 10 haneli format: 537 985 44 56
+        if (numbers.length === 0) return ""
+        if (numbers.length <= 3) return numbers
+        if (numbers.length <= 6) return `${numbers.slice(0, 3)} ${numbers.slice(3)}`
+        if (numbers.length <= 8) return `${numbers.slice(0, 3)} ${numbers.slice(3, 6)} ${numbers.slice(6)}`
+        return `${numbers.slice(0, 3)} ${numbers.slice(3, 6)} ${numbers.slice(6, 8)} ${numbers.slice(8, 10)}`
+    }
+
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        // +90 ve boşlukları temizle
+        const cleaned = value.replace(/\+90\s*/g, "").replace(/\s/g, "")
+        const formatted = formatPhoneNumber(cleaned)
+        setPhone(formatted)
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (password !== confirmPassword) {
-            // TODO: Show error message
+        setFormError(null)
+
+        // Şifre kontrolü
+        if (password.length < 8) {
+            setFormError("Şifre en az 8 karakter olmalıdır.")
             return
         }
+
+        if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+            setFormError("Şifre en az bir küçük harf, bir büyük harf ve bir rakam içermelidir.")
+            return
+        }
+
+        if (password !== confirmPassword) {
+            setFormError("Şifreler eşleşmiyor.")
+            return
+        }
+
+        // Telefon numarasını temizle (sadece rakamlar)
+        const cleanPhone = phone.replace(/\D/g, "")
+        
+        // Telefon numarası format kontrolü (10 haneli olmalı, 5 ile başlamalı)
+        if (cleanPhone.length !== 10 || !cleanPhone.startsWith("5")) {
+            setFormError("Geçerli bir telefon numarası giriniz (örn: 537 985 44 56)")
+            return
+        }
+
+        // Backend'e 0 ile başlayan 11 haneli format gönder (05379854456)
+        const phoneForBackend = `0${cleanPhone}`
+
         setIsLoading(true)
-        // TODO: Implement sign up logic
-        setTimeout(() => setIsLoading(false), 1000)
+        const result = await signUp(firstName, lastName, email, phoneForBackend, password)
+        setIsLoading(false)
+
+        if (result.success) {
+            setIsSuccess(true)
+        } else {
+            setFormError(result.error || "Kayıt başarısız. Lütfen tekrar deneyin.")
+        }
+    }
+
+    // Başarı ekranı
+    if (isSuccess) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-background via-background to-muted/20 px-4 py-12">
+                <div className="w-full max-w-md space-y-8 text-center">
+                    <div className="space-y-4">
+                        <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                            <CheckCircle className="h-8 w-8 text-primary" />
+                        </div>
+                        <div className="space-y-2">
+                            <h1 className="text-3xl font-bold tracking-tight">
+                                Hesabınız Başarıyla Oluşturuldu
+                            </h1>
+                            <p className="text-muted-foreground">
+                                Giriş ekranından e-posta ve telefon numaranızı doğruladıktan sonra giriş yapabilirsiniz.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <Link to="/sign-in">
+                            <Button className="w-full" size="lg">
+                                Giriş Ekranına Git
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -92,19 +182,39 @@ export default function SignUp() {
                         </p>
                     </div>
 
+                    {(error || formError) && (
+                        <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                            <p className="text-sm text-destructive">{error || formError}</p>
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Ad Soyad</Label>
-                                <Input
-                                    id="name"
-                                    type="text"
-                                    placeholder="Adınız Soyadınız"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    required
-                                    autoComplete="name"
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="firstName">Ad</Label>
+                                    <Input
+                                        id="firstName"
+                                        type="text"
+                                        placeholder="Adınız"
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                        required
+                                        autoComplete="given-name"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="lastName">Soyad</Label>
+                                    <Input
+                                        id="lastName"
+                                        type="text"
+                                        placeholder="Soyadınız"
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                        required
+                                        autoComplete="family-name"
+                                    />
+                                </div>
                             </div>
 
                             <div className="space-y-2">
@@ -118,6 +228,27 @@ export default function SignUp() {
                                     required
                                     autoComplete="email"
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="phone">Telefon Numarası</Label>
+                                <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1.5 px-3 h-10 border border-input bg-background rounded-md">
+                                        <span className="text-lg">🇹🇷</span>
+                                        <span className="text-sm font-medium">+90</span>
+                                    </div>
+                                    <Input
+                                        id="phone"
+                                        type="tel"
+                                        placeholder="537 985 44 56"
+                                        value={phone}
+                                        onChange={handlePhoneChange}
+                                        required
+                                        autoComplete="tel"
+                                        maxLength={13}
+                                        className="flex-1"
+                                    />
+                                </div>
                             </div>
 
                             <div className="space-y-2">
@@ -183,7 +314,14 @@ export default function SignUp() {
                             size="lg"
                             disabled={isLoading}
                         >
-                            {isLoading ? "Kayıt yapılıyor..." : "Kayıt Ol"}
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Kayıt yapılıyor...
+                                </>
+                            ) : (
+                                "Kayıt Ol"
+                            )}
                         </Button>
                     </form>
 

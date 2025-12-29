@@ -40,7 +40,7 @@ app.get("/", (_req, res) => {
 });
 
 //api routes
-app.use(`${config.apiPrefix}/${config.apiVersion}/auth`, authRoutes);
+app.use(`${config.apiPrefix}/auth`, authRoutes);
 
 app.use(errorHandler);
 

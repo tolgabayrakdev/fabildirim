@@ -18,9 +18,8 @@ const PORT = config.port || 1234;
                 `📦 Environment:     ${config.nodeEnv.toUpperCase()}`,
                 `🌐 Port:            ${PORT}`,
                 `🔗 API Prefix:      ${config.apiPrefix}`,
-                `📌 API Version:     ${config.apiVersion}`,
                 `🌍 Client URL:      ${config.clientUrl}`,
-                `📡 API Endpoint:    http://localhost:${PORT}${config.apiPrefix}/${config.apiVersion}`,
+                `📡 API Endpoint:    http://localhost:${PORT}${config.apiPrefix}`,
                 "=".repeat(50) + "\n",
             ].join("\n");
 
