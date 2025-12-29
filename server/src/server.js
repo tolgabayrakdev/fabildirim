@@ -9,16 +9,20 @@ const startServer = async () => {
     logger.info("Database connected");
 
     const server = app.listen(config.port, () => {
-      console.log("\n" + "=".repeat(50));
-      console.log("🚀  SERVER STARTED SUCCESSFULLY");
-      console.log("=".repeat(50));
-      console.log(`📦 Environment:     ${config.nodeEnv.toUpperCase()}`);
-      console.log(`🌐 Port:            ${config.port}`);
-      console.log(`🔗 API Prefix:      ${config.apiPrefix}`);
-      console.log(`📌 API Version:     ${config.apiVersion}`);
-      console.log(`🌍 Client URL:      ${config.clientUrl}`);
-      console.log(`📡 API Endpoint:    http://localhost:${config.port}${config.apiPrefix}/${config.apiVersion}`);
-      console.log("=".repeat(50) + "\n");
+      const serverInfo = [
+        "\n" + "=".repeat(50),
+        "🚀  SERVER STARTED SUCCESSFULLY",
+        "=".repeat(50),
+        `📦 Environment:     ${config.nodeEnv.toUpperCase()}`,
+        `🌐 Port:            ${config.port}`,
+        `🔗 API Prefix:      ${config.apiPrefix}`,
+        `📌 API Version:     ${config.apiVersion}`,
+        `🌍 Client URL:      ${config.clientUrl}`,
+        `📡 API Endpoint:    http://localhost:${config.port}${config.apiPrefix}/${config.apiVersion}`,
+        "=".repeat(50) + "\n"
+      ].join("\n");
+      
+      logger.info(serverInfo);
       logger.info(`Server running on port ${config.port}`);
     });
 

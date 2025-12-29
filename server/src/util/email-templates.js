@@ -1,14 +1,14 @@
-export const BRAND_NAME = "YourApp";
-export const BRAND_URL = "https://yourapp.com";
+export const BRAND_NAME = "Fabildirim";
+export const BRAND_URL = "https://fabildirim.com";
 export const BRAND_TAGLINE = "None";
 export const BRAND_DESCRIPTION = "None";
 
-const BRAND_COLOR = "#2563eb"; // Mavi ton
-const BRAND_SECONDARY = "#1e40af";
-const TEXT_COLOR = "#1f2937";
-const TEXT_SECONDARY = "#6b7280";
-const BORDER_COLOR = "#e5e7eb";
-const BACKGROUND_COLOR = "#f9fafb";
+const BRAND_COLOR = "#52525b"; // Zinc-600
+const BRAND_SECONDARY = "#3f3f46"; // Zinc-700
+const TEXT_COLOR = "#18181b"; // Zinc-900
+const TEXT_SECONDARY = "#71717a"; // Zinc-500
+const BORDER_COLOR = "#e4e4e7"; // Zinc-200
+const BACKGROUND_COLOR = "#fafafa"; // Zinc-50
 
 /**
  * Base email template wrapper
@@ -115,7 +115,7 @@ export function getEmailVerificationTemplate(firstName, code) {
             </p>
             
             <!-- Code Box -->
-            <div style="background: linear-gradient(135deg, ${BRAND_COLOR}15 0%, ${BRAND_SECONDARY}15 100%); border: 2px dashed ${BRAND_COLOR}; border-radius: 12px; padding: 25px; margin: 30px 0; display: inline-block;">
+            <div style="background: linear-gradient(135deg, rgba(82, 82, 91, 0.1) 0%, rgba(63, 63, 70, 0.1) 100%); border: 2px dashed ${BRAND_COLOR}; border-radius: 12px; padding: 25px; margin: 30px 0; display: inline-block;">
                 <div style="font-size: 36px; font-weight: 700; letter-spacing: 8px; color: ${BRAND_COLOR}; font-family: 'Courier New', monospace;">
                     ${code}
                 </div>
@@ -226,7 +226,7 @@ export function getWelcomeTemplate(firstName, lastName) {
             </p>
         </div>
         
-        <div style="background-color: #f0f9ff; border-left: 4px solid ${BRAND_COLOR}; padding: 20px; margin: 30px 0; border-radius: 4px;">
+        <div style="background-color: #f4f4f5; border-left: 4px solid ${BRAND_COLOR}; padding: 20px; margin: 30px 0; border-radius: 4px;">
             <p style="margin: 0; color: ${TEXT_COLOR}; font-size: 14px; line-height: 1.6;">
                 <strong>💡 İpucu:</strong> Hesabınızı doğruladıktan sonra müşterilerinizi yönetmeye, diyet planları oluşturmaya ve ilerlemelerini takip etmeye başlayabilirsiniz.
             </p>

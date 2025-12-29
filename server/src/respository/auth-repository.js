@@ -33,4 +33,24 @@ export default class AuthRepository {
         const result = await dbClient.query(query, values);
         return result.rows[0];
     }
+
+    async updateEmailVerifyCode(userId, code, createdAt, client = null) {
+        const dbClient = client || pool;
+        const query = `
+            UPDATE users 
+            SET email_verify_code = $1, email_verify_code_created_at = $2 
+            WHERE id = $3
+        `;
+        await dbClient.query(query, [code, createdAt, userId]);
+    }
+
+    async updateSmsVerifyCode(userId, code, createdAt, client = null) {
+        const dbClient = client || pool;
+        const query = `
+            UPDATE users 
+            SET sms_verify_code = $1, sms_verify_code_created_at = $2 
+            WHERE id = $3
+        `;
+        await dbClient.query(query, [code, createdAt, userId]);
+    }
 }

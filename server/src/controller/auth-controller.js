@@ -19,4 +19,42 @@ export default class AuthController {
             next(error);
         }
     }
+
+    async signIn(req, res, next) {
+        try {
+            const { email, password } = req.body;
+            const result = await this.authService.signIn(email, password);
+
+            res.cookie("access_token", result.accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'none'
+            })
+            res.cookie("refresh_token", result.refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'none'
+            })
+            res.status(200).json({
+                success: true,
+                message: 'Giriş başarılı.',
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async signOut(_req, res, next) {
+        try {
+            res.clearCookie("access_token");
+            res.clearCookie("refresh_token");
+            res.status(200).json({
+                success: true,
+                message: 'Çıkış işlemi başarılıyla gerçekleştirildi.',
+            });
+
+        } catch (error) {
+            next(error);
+        }
+    }
 }

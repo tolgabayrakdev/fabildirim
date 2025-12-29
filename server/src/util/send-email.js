@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer';
+import { BRAND_NAME } from './email-templates.js';
+import logger from '../config/logger.js';
 
 class EmailService {
     constructor() {
@@ -11,18 +13,21 @@ class EmailService {
         });
     }
 
-    async sendEmail(to, subject, text) {
+    async sendEmail(to, subject, options = {}) {
+        const { text, html } = options;
+        
         const mailOptions = {
             from: {
-                name: 'Your App Name',
+                name: BRAND_NAME,
                 address: process.env.EMAIL_USER
             },
             to,
             subject,
-            text,
+            ...(html && { html }),
+            ...(text && { text }),
             headers: {
-                'X-Entity-Ref-ID': 'your app name',
-                'X-Mailer': `Your App Name Mailer`,
+                'X-Entity-Ref-ID': BRAND_NAME.toLowerCase(),
+                'X-Mailer': `${BRAND_NAME} Mailer`,
                 'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=Unsubscribe>`,
                 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
             }
@@ -30,10 +35,10 @@ class EmailService {
 
         try {
             const info = await this.transporter.sendMail(mailOptions);
-            console.log('Email sent: ' + info.response);
+            logger.info(`Email sent to ${to}: ${info.response}`);
             return info;
         } catch (error) {
-            console.error('Error sending email:', error);
+            logger.error(`Error sending email to ${to}:`, error);
             throw error;
         }
     }
