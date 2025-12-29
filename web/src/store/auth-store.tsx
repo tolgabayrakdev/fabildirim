@@ -407,6 +407,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
+    set({ loading: true });
     try {
       const response = await fetch(apiUrl("/api/auth/logout"), {
         method: "POST",

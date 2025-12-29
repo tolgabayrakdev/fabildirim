@@ -1,4 +1,4 @@
-import { Home, LogOut, Search, Settings, User } from "lucide-react"
+import { Home, LogOut, Search, Settings, User, Loader2 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router"
 import { useAuthStore } from "@/store/auth-store"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -150,9 +150,22 @@ export function AppSidebar() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Çıkış Yap</span>
+                      <DropdownMenuItem 
+                        onClick={handleLogout} 
+                        disabled={loading}
+                        className="text-destructive focus:text-destructive cursor-pointer"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <span>Çıkış yapılıyor...</span>
+                          </>
+                        ) : (
+                          <>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Çıkış Yap</span>
+                          </>
+                        )}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
