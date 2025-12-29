@@ -4,7 +4,7 @@ import logger from "../config/logger.js";
 const netgsm = new Netgsm({
     username: process.env.NETGSM_NUMBER,
     password: process.env.NETGSM_PASSWORD,
-    appname: ""
+    appname: "",
 });
 
 export async function sendSms({ msg, no }) {
@@ -12,10 +12,12 @@ export async function sendSms({ msg, no }) {
         const response = await netgsm.sendRestSms({
             msgheader: process.env.NETGSM_NUMBER,
             encoding: "TR",
-            messages: [{
-                msg: msg,
-                no: no
-            }]
+            messages: [
+                {
+                    msg: msg,
+                    no: no,
+                },
+            ],
         });
         logger.info(`SMS sent to ${no}, jobId: ${response.jobid}`);
         return response.jobid;

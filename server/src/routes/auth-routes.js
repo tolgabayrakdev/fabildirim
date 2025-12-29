@@ -6,7 +6,11 @@ import { signUpSchema, signInSchema } from "../schema/auth-schema.js";
 const router = express.Router();
 const authController = new AuthController();
 
-router.post("/register", schemaValidation(signUpSchema), authController.signUp.bind(authController));
+router.post(
+    "/register",
+    schemaValidation(signUpSchema),
+    authController.signUp.bind(authController)
+);
 router.post("/login", schemaValidation(signInSchema), authController.signIn.bind(authController));
 router.post("/logout", authController.signOut.bind(authController));
 

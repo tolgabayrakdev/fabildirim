@@ -1,7 +1,6 @@
-import pool from '../config/database.js';
+import pool from "../config/database.js";
 
 export default class AuthRepository {
-
     async findByEmail(email) {
         const query = `SELECT * FROM users WHERE email = $1`;
         const result = await pool.query(query, [email]);
@@ -27,7 +26,7 @@ export default class AuthRepository {
             userData.last_name,
             userData.email,
             userData.phone,
-            userData.password
+            userData.password,
         ];
 
         const result = await dbClient.query(query, values);

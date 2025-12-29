@@ -1,5 +1,5 @@
-import HttpException from '../exception/http-exception.js';
-import logger from '../config/logger.js';
+import HttpException from "../exception/http-exception.js";
+import logger from "../config/logger.js";
 
 export default function errorHandler(err, req, res, _next) {
     if (err instanceof HttpException) {
@@ -8,5 +8,5 @@ export default function errorHandler(err, req, res, _next) {
     }
 
     logger.error(`${req.method} ${req.url} - 500 - ${err.message}`);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
 }

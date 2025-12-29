@@ -1,6 +1,5 @@
 import AuthService from "../service/auth-service.js";
 
-
 export default class AuthController {
     constructor() {
         this.authService = new AuthService();
@@ -12,9 +11,9 @@ export default class AuthController {
             const user = await this.authService.signUp(userData);
             res.status(201).json({
                 success: true,
-                message: 'Kullanıcı başarıyla oluşturuldu.',
-                data: user
-            })
+                message: "Kullanıcı başarıyla oluşturuldu.",
+                data: user,
+            });
         } catch (error) {
             next(error);
         }
@@ -27,17 +26,17 @@ export default class AuthController {
 
             res.cookie("access_token", result.accessToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'none'
-            })
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "none",
+            });
             res.cookie("refresh_token", result.refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'none'
-            })
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "none",
+            });
             res.status(200).json({
                 success: true,
-                message: 'Giriş başarılı.',
+                message: "Giriş başarılı.",
             });
         } catch (error) {
             next(error);
@@ -50,9 +49,8 @@ export default class AuthController {
             res.clearCookie("refresh_token");
             res.status(200).json({
                 success: true,
-                message: 'Çıkış işlemi başarılıyla gerçekleştirildi.',
+                message: "Çıkış işlemi başarılıyla gerçekleştirildi.",
             });
-
         } catch (error) {
             next(error);
         }

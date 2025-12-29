@@ -16,7 +16,7 @@ const BACKGROUND_COLOR = "#fafafa"; // Zinc-50
  */
 function getBaseTemplate(content, options = {}) {
     const { title, preheader } = options;
-    
+
     return `
 <!DOCTYPE html>
 <html lang="tr">
@@ -25,10 +25,10 @@ function getBaseTemplate(content, options = {}) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>${title || BRAND_NAME}</title>
-    ${preheader ? `<style type="text/css">.preheader { display: none !important; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0; }</style>` : ''}
+    ${preheader ? `<style type="text/css">.preheader { display: none !important; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0; }</style>` : ""}
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: ${BACKGROUND_COLOR};">
-    ${preheader ? `<div class="preheader" style="display: none !important; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0;">${preheader}</div>` : ''}
+    ${preheader ? `<div class="preheader" style="display: none !important; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0;">${preheader}</div>` : ""}
     
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${BACKGROUND_COLOR}; padding: 40px 20px;">
         <tr>
@@ -132,10 +132,10 @@ export function getEmailVerificationTemplate(firstName, code) {
             </p>
         </div>
     `;
-    
+
     return getBaseTemplate(content, {
         title: `E-posta Doğrulama Kodu - ${BRAND_NAME}`,
-        preheader: `Doğrulama kodunuz: ${code}`
+        preheader: `Doğrulama kodunuz: ${code}`,
     });
 }
 
@@ -191,10 +191,10 @@ export function getPasswordResetTemplate(resetLink, expiresInMinutes = 15) {
             </p>
         </div>
     `;
-    
+
     return getBaseTemplate(content, {
         title: `Şifre Sıfırlama - ${BRAND_NAME}`,
-        preheader: "Hesabınız için şifre sıfırlama talebi"
+        preheader: "Hesabınız için şifre sıfırlama talebi",
     });
 }
 
@@ -203,7 +203,7 @@ export function getPasswordResetTemplate(resetLink, expiresInMinutes = 15) {
  */
 export function getWelcomeTemplate(firstName, lastName) {
     const fullName = `${firstName} ${lastName}`.trim();
-    
+
     const content = `
         <div style="text-align: center; margin-bottom: 30px;">
             <h2 style="margin: 0 0 10px 0; color: ${TEXT_COLOR}; font-size: 24px; font-weight: 600;">
@@ -232,10 +232,10 @@ export function getWelcomeTemplate(firstName, lastName) {
             </p>
         </div>
     `;
-    
+
     return getBaseTemplate(content, {
         title: `Hoş Geldiniz - ${BRAND_NAME}`,
-        preheader: `${BRAND_NAME}'ya hoş geldiniz!`
+        preheader: `${BRAND_NAME}'ya hoş geldiniz!`,
     });
 }
 
@@ -255,7 +255,9 @@ export function getInfoTemplate(title, message, buttonText = null, buttonLink = 
                 ${message}
             </div>
             
-            ${buttonText && buttonLink ? `
+            ${
+                buttonText && buttonLink
+                    ? `
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 30px auto;">
                     <tr>
                         <td align="center" style="border-radius: 6px; background: linear-gradient(135deg, ${BRAND_COLOR} 0%, ${BRAND_SECONDARY} 100%);">
@@ -266,12 +268,14 @@ export function getInfoTemplate(title, message, buttonText = null, buttonLink = 
                         </td>
                     </tr>
                 </table>
-            ` : ''}
+            `
+                    : ""
+            }
         </div>
     `;
-    
+
     return getBaseTemplate(content, {
         title: `${title} - ${BRAND_NAME}`,
-        preheader: title
+        preheader: title,
     });
 }
