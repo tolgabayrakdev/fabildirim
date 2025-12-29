@@ -5,6 +5,9 @@ import helmet from "helmet";
 import config from "./config/app-config.js";
 import errorHandler from "./middleware/error-handler.js";
 
+// api routes imports
+import authRoutes from "./routes/auth-routes.js";
+
 const app = express();
 
 app.use(helmet());
@@ -25,6 +28,10 @@ app.get("/", (_req, res) => {
     version: '1.0.0'
   });
 });
+
+
+//api routes
+app.use(`${config.apiPrefix}/${config.apiVersion}/auth`, authRoutes);
 
 app.use(errorHandler);
 
