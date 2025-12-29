@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import AuthProvider from "@/providers/auth-provider";
 import { Outlet } from "react-router";
 
@@ -18,6 +19,7 @@ export default function DashboardLayout() {
                             <Outlet />
                         </div>
                     </div>
+                    <Toaster position="top-right" />
                 </SidebarInset>
             </SidebarProvider>
         </AuthProvider>
