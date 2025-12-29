@@ -43,12 +43,12 @@ export default class AuthController {
             // Normal giriş başarılı, token'ları cookie'ye kaydet
             res.cookie("access_token", result.accessToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: true,
                 sameSite: "none",
             });
             res.cookie("refresh_token", result.refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: true,
                 sameSite: "none",
             });
             res.status(200).json({
@@ -125,12 +125,12 @@ export default class AuthController {
             if (result.accessToken && result.refreshToken) {
                 res.cookie("access_token", result.accessToken, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
+                    secure: true,
                     sameSite: "none",
                 });
                 res.cookie("refresh_token", result.refreshToken, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
+                    secure: true,
                     sameSite: "none",
                 });
             }
@@ -156,12 +156,12 @@ export default class AuthController {
             // Token'ları cookie'ye kaydet
             res.cookie("access_token", result.accessToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: true,
                 sameSite: "none",
             });
             res.cookie("refresh_token", result.refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: true,
                 sameSite: "none",
             });
 

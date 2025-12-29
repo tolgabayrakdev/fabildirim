@@ -19,7 +19,6 @@ export default function SignIn() {
         resendEmailVerification, 
         resendSmsVerification,
         checkAuth,
-        loading: authLoading,
         error 
     } = useAuthStore()
 
@@ -85,7 +84,6 @@ export default function SignIn() {
         e.preventDefault()
         setIsLoading(true)
         const result = await login(email, password)
-        setIsLoading(false)
 
         if (result.success) {
             navigate("/", { replace: true })
@@ -95,6 +93,7 @@ export default function SignIn() {
             setMaskedPhone(result.maskedPhone || "")
             setStep("smsOtp")
         }
+        setIsLoading(false)
     }
 
     const handleEmailOtp = async (e: React.FormEvent) => {
@@ -150,8 +149,8 @@ export default function SignIn() {
         return `${mins}:${secs.toString().padStart(2, "0")}`
     }
 
-    // Auth kontrolü yapılırken loading göster
-    if (checkingAuth || authLoading) {
+    // Auth kontrolü yapılırken loading göster (sadece ilk kontrol için)
+    if (checkingAuth) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="flex flex-col items-center gap-3">

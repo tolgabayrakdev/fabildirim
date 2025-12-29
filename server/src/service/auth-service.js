@@ -345,9 +345,6 @@ export default class AuthService {
         if (!user) {
             throw new HttpException(404, "Kullanıcı bulunamadı.");
         }
-
-        // Hassas bilgileri kaldır ve frontend formatına dönüştür
-        // Not: id UUID olarak döndürülüyor, frontend'de string olarak kullanılabilir
         return {
             id: user.id,
             email: user.email,

@@ -12,9 +12,9 @@ export const verifyToken = (req, res, next) => {
             });
         }
 
-        const jwtSecret = process.env.JWT_SECRET_KEY;
+        const jwtSecret = process.env.ACCESS_TOKEN_SECRET;
         if (!jwtSecret) {
-            logger.error("JWT_SECRET_KEY environment variable is not set");
+            logger.error("ACCESS_TOKEN_SECRET environment variable is not set");
             return res.status(500).json({
                 success: false,
                 message: "Sunucu yapılandırma hatası. Lütfen daha sonra tekrar deneyin."
