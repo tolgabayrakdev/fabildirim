@@ -79,13 +79,12 @@ export function AppSidebar() {
                       asChild 
                       isActive={isActive}
                       className={cn(
-                        "relative transition-all",
-                        isActive && "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-8 before:w-1 before:bg-primary"
+                        isActive && "!bg-primary !text-primary-foreground hover:!bg-primary/90 data-[active=true]:!bg-primary data-[active=true]:!text-primary-foreground"
                       )}
                     >
                       <Link to={item.url} className="flex items-center gap-3 w-full">
-                        <item.icon className={cn("h-5 w-5 transition-colors", isActive && "text-primary")} />
-                        <span className={cn("text-[15px]", isActive && "font-semibold")}>{item.title}</span>
+                        <item.icon className={cn("h-5 w-5", isActive && "!text-primary-foreground")} />
+                        <span className={cn("text-[15px]", isActive && "!text-primary-foreground")}>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
