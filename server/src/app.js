@@ -3,6 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
 import config from "./config/app-config.js";
+import logger from "./config/logger.js";
 import errorHandler from "./middleware/error-handler.js";
 
 // api routes imports
@@ -15,7 +16,15 @@ app.use(cors({
   origin: config.clientUrl,
   credentials: true,
 }));
-app.use(morgan("dev"));
+
+// Morgan HTTP request logger - winston ile entegre
+const morganFormat = config.nodeEnv === "production" ? "combined" : "dev";
+app.use(morgan(morganFormat, {
+  stream: {
+    write: (message) => logger.info(message.trim())
+  }
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

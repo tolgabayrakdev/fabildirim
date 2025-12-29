@@ -1,4 +1,4 @@
-import pool from '../db/pool.js';
+import pool from '../config/database.js';
 
 export default class AuthRepository {
 
