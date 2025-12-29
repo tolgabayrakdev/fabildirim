@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import { useAuthStore } from "@/store/auth-store";
-import { settingsService } from "@/services/settings-service";
+import { apiUrl } from "@/lib/api";
 
 export default function Settings() {
     const navigate = useNavigate();
@@ -56,20 +56,29 @@ export default function Settings() {
         setPasswordLoading(true);
         
         try {
-            const result = await settingsService.changePassword(
-                passwordForm.currentPassword,
-                passwordForm.newPassword
-            );
+            const response = await fetch(apiUrl("/api/auth/change-password"), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    currentPassword: passwordForm.currentPassword,
+                    newPassword: passwordForm.newPassword,
+                }),
+            });
 
-            if (result.success) {
-                toast.success(result.message || "Şifreniz başarıyla değiştirildi.");
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                toast.success(data.message || "Şifreniz başarıyla değiştirildi.");
                 setPasswordForm({
                     currentPassword: "",
                     newPassword: "",
                     confirmPassword: "",
                 });
             } else {
-                toast.error(result.error || "Şifre değiştirilemedi.");
+                toast.error(data.message || data.error?.message || "Şifre değiştirilemedi.");
             }
         } catch (err) {
             console.error("Change password error:", err);
@@ -80,22 +89,30 @@ export default function Settings() {
     };
     
     const handleDeleteAccount = async () => {
-        if (deleteConfirmText !== "SİL") {
-            toast.error("Lütfen 'SİL' yazarak onaylayın.");
+        if (deleteConfirmText !== "Onaylıyorum") {
+            toast.error("Lütfen 'Onaylıyorum' yazarak onaylayın.");
             return;
         }
         
         setDeleteLoading(true);
         
         try {
-            const result = await settingsService.deleteAccount();
+            const response = await fetch(apiUrl("/api/auth/delete-account"), {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+            });
 
-            if (result.success) {
-                toast.success(result.message || "Hesabınız başarıyla silindi.");
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                toast.success(data.message || "Hesabınız başarıyla silindi.");
                 reset();
                 navigate("/sign-in");
             } else {
-                toast.error(result.error || "Hesap silinemedi.");
+                toast.error(data.message || data.error?.message || "Hesap silinemedi.");
                 setDeleteDialogOpen(false);
             }
         } catch (err) {
@@ -210,18 +227,18 @@ export default function Settings() {
                         <DialogTitle>Hesabı Sil</DialogTitle>
                         <DialogDescription>
                             Bu işlem geri alınamaz. Hesabınızı kalıcı olarak silmek istediğinizden emin misiniz?
-                            Onaylamak için aşağıya <strong>SİL</strong> yazın.
+                            Onaylamak için aşağıya <strong>Onaylıyorum</strong> yazın.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="deleteConfirm">Onay için 'SİL' yazın</Label>
+                            <Label htmlFor="deleteConfirm">Onay için 'Onaylıyorum' yazın</Label>
                             <Input
                                 id="deleteConfirm"
                                 type="text"
                                 value={deleteConfirmText}
                                 onChange={(e) => setDeleteConfirmText(e.target.value)}
-                                placeholder="SİL"
+                                placeholder="Onaylıyorum"
                                 disabled={deleteLoading}
                             />
                         </div>
@@ -240,7 +257,7 @@ export default function Settings() {
                         <Button
                             variant="destructive"
                             onClick={handleDeleteAccount}
-                            disabled={deleteLoading || deleteConfirmText !== "SİL"}
+                            disabled={deleteLoading || deleteConfirmText !== "Onaylıyorum"}
                         >
                             {deleteLoading ? "Siliniyor..." : "Hesabı Kalıcı Olarak Sil"}
                         </Button>
