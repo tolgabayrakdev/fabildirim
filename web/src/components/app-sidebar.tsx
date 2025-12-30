@@ -1,4 +1,4 @@
-import { Home, LogOut, Settings, User, Loader2 } from "lucide-react"
+import { Home, LogOut, Settings, User, Loader2, Crown } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router"
 import { useAuthStore } from "@/store/auth-store"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -121,9 +121,17 @@ export function AppSidebar() {
                           {user?.name ? getInitials(user.name) : <User className="h-4 w-4" />}
                         </div>
                         <div className="flex flex-col items-start flex-1 min-w-0 ml-2">
-                          <span className="text-sm font-medium truncate w-full text-sidebar-foreground">
-                            {user?.name || "Kullanıcı"}
-                          </span>
+                          <div className="flex items-center gap-2 w-full">
+                            <span className="text-sm font-medium truncate text-sidebar-foreground">
+                              {user?.name || "Kullanıcı"}
+                            </span>
+                            {user?.subscription?.plan?.name === "Pro" && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30 shrink-0">
+                                <Crown className="h-2.5 w-2.5" />
+                                Pro
+                              </span>
+                            )}
+                          </div>
                           <span className="text-xs text-muted-foreground truncate w-full">
                             {user?.email || ""}
                           </span>
@@ -133,9 +141,17 @@ export function AppSidebar() {
                     <DropdownMenuContent align="end" className="w-56" side="top">
                       <DropdownMenuLabel>
                         <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            {user?.name || "Kullanıcı"}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium leading-none">
+                              {user?.name || "Kullanıcı"}
+                            </p>
+                            {user?.subscription?.plan?.name === "Pro" && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30">
+                                <Crown className="h-2.5 w-2.5" />
+                                Pro
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs leading-none text-muted-foreground">
                             {user?.email || ""}
                           </p>

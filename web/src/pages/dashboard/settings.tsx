@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,10 +8,37 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import { useAuthStore } from "@/store/auth-store";
 import { apiUrl } from "@/lib/api";
+import { Loader2, Crown, Check } from "lucide-react";
+
+interface Subscription {
+    id: string;
+    plan: {
+        id: string;
+        name: string;
+        price: number;
+    };
+    start_date: string;
+    end_date: string | null;
+    status: string;
+}
+
+interface Plan {
+    id: string;
+    name: string;
+    price: number;
+}
 
 export default function Settings() {
     const navigate = useNavigate();
     const { reset } = useAuthStore();
+    
+    // Abonelik state
+    const [subscription, setSubscription] = useState<Subscription | null>(null);
+    const [plans, setPlans] = useState<Plan[]>([]);
+    const [subscriptionLoading, setSubscriptionLoading] = useState(true);
+    const [upgradeLoading, setUpgradeLoading] = useState(false);
+    const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
     
     // Şifre değiştirme formu state
     const [passwordForm, setPasswordForm] = useState({
@@ -26,6 +53,85 @@ export default function Settings() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
+    
+    // Abonelik bilgilerini yükle
+    useEffect(() => {
+        const fetchSubscriptionData = async () => {
+            setSubscriptionLoading(true);
+            try {
+                // Mevcut abonelik
+                const subResponse = await fetch(apiUrl("/api/subscriptions/current"), {
+                    method: "GET",
+                    credentials: "include",
+                });
+                
+                if (subResponse.ok) {
+                    const subData = await subResponse.json();
+                    if (subData.success) {
+                        setSubscription(subData.data);
+                    }
+                }
+                
+                // Tüm planlar
+                const plansResponse = await fetch(apiUrl("/api/subscriptions/plans"), {
+                    method: "GET",
+                    credentials: "include",
+                });
+                
+                if (plansResponse.ok) {
+                    const plansData = await plansResponse.json();
+                    if (plansData.success) {
+                        setPlans(plansData.data);
+                    }
+                }
+            } catch (err) {
+                console.error("Subscription fetch error:", err);
+            } finally {
+                setSubscriptionLoading(false);
+            }
+        };
+        
+        fetchSubscriptionData();
+    }, []);
+    
+    const handleUpgrade = async () => {
+        if (!selectedPlan) return;
+        
+        setUpgradeLoading(true);
+        
+        try {
+            const response = await fetch(apiUrl("/api/subscriptions/upgrade"), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    planId: selectedPlan.id,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                toast.success(data.message || "Üyeliğiniz başarıyla yükseltildi.");
+                setUpgradeDialogOpen(false);
+                setSelectedPlan(null);
+                
+                // Sayfayı tamamen yenile
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                toast.error(data.message || data.error?.message || "Üyelik yükseltilemedi.");
+            }
+        } catch (err) {
+            console.error("Upgrade error:", err);
+            toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+        } finally {
+            setUpgradeLoading(false);
+        }
+    };
     
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -132,6 +238,125 @@ export default function Settings() {
                     Hesap ayarlarınızı buradan yönetebilirsiniz.
                 </p>
             </div>
+            
+            {/* Abonelik Bilgileri */}
+            <div className="space-y-6">
+                {subscriptionLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                ) : subscription ? (
+                    <div className="grid gap-6 md:grid-cols-[1fr_auto_1fr]">
+                        {/* Mevcut Plan Bilgileri */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-lg font-semibold">Mevcut Plan</h3>
+                                {subscription.plan.name === "Pro" && (
+                                    <Crown className="h-5 w-5 text-yellow-500" />
+                                )}
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground mb-1">Durum</p>
+                                    <p className="text-sm font-medium text-green-600">
+                                        {subscription.status === "active" ? "Aktif" : subscription.status}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground mb-1">Başlangıç Tarihi</p>
+                                    <p className="text-sm">
+                                        {new Date(subscription.start_date).toLocaleDateString("tr-TR")}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Ayırıcı Çizgi */}
+                        <div className="hidden md:block">
+                            <Separator orientation="vertical" className="h-full" />
+                        </div>
+                        <div className="md:hidden col-span-full">
+                            <Separator />
+                        </div>
+                        
+                        {/* Mevcut Planlar */}
+                        {plans.length > 0 && (
+                            <div className="space-y-4 md:col-start-3">
+                                <h3 className="text-lg font-semibold">Mevcut Planlar</h3>
+                                <div className="space-y-3">
+                                    {plans.map((plan) => {
+                                        const isCurrentPlan = subscription.plan.id === plan.id;
+                                        const canUpgrade = plan.price > subscription.plan.price;
+                                        const canDowngrade = plan.price < subscription.plan.price;
+                                        
+                                        return (
+                                            <div
+                                                key={plan.id}
+                                                className={`p-4 border rounded-lg ${
+                                                    isCurrentPlan ? "bg-primary/5 border-primary" : ""
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        {plan.name === "Pro" && (
+                                                            <Crown className="h-4 w-4 text-yellow-500" />
+                                                        )}
+                                                        <div>
+                                                            <p className="font-semibold">{plan.name}</p>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                {plan.price === 0 ? "Ücretsiz" : `${plan.price} ₺`}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {isCurrentPlan && (
+                                                            <span className="text-sm text-primary font-medium flex items-center gap-1">
+                                                                <Check className="h-4 w-4" />
+                                                                Aktif
+                                                            </span>
+                                                        )}
+                                                        {canUpgrade && !isCurrentPlan && (
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    setSelectedPlan(plan);
+                                                                    setUpgradeDialogOpen(true);
+                                                                }}
+                                                            >
+                                                                Yükselt
+                                                            </Button>
+                                                        )}
+                                                        {canDowngrade && !isCurrentPlan && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => {
+                                                                    setSelectedPlan(plan);
+                                                                    setUpgradeDialogOpen(true);
+                                                                }}
+                                                            >
+                                                                Normal Plana Geç
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="py-4">
+                        <p className="text-sm text-muted-foreground">
+                            Abonelik bilgisi bulunamadı.
+                        </p>
+                    </div>
+                )}
+            </div>
+            
+            <Separator />
             
             {/* Şifre Değiştirme */}
             <div className="space-y-6">
@@ -260,6 +485,70 @@ export default function Settings() {
                             disabled={deleteLoading || deleteConfirmText !== "Onaylıyorum"}
                         >
                             {deleteLoading ? "Siliniyor..." : "Hesabı Kalıcı Olarak Sil"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            
+            {/* Üyelik Değiştirme Onay Dialog */}
+            <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>
+                            {selectedPlan && subscription && selectedPlan.price > subscription.plan.price
+                                ? "Üyelik Yükseltme"
+                                : "Üyelik Değiştirme"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {selectedPlan && subscription && (
+                                <>
+                                    {selectedPlan.price > subscription.plan.price ? (
+                                        <>
+                                            Üyeliğinizi <strong>{selectedPlan.name}</strong> planına yükseltmek istediğinizden emin misiniz?
+                                            {selectedPlan.price > 0 && (
+                                                <span className="block mt-2">
+                                                    Bu işlem için ödeme gerekebilir. (Şu an ödeme sistemi entegre değil, test modunda çalışıyor)
+                                                </span>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            Üyeliğinizi <strong>{selectedPlan.name}</strong> planına değiştirmek istediğinizden emin misiniz?
+                                            <span className="block mt-2 text-amber-600 dark:text-amber-400">
+                                                Pro plan özelliklerine erişiminiz sona erecektir.
+                                            </span>
+                                        </>
+                                    )}
+                                </>
+                            )}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setUpgradeDialogOpen(false);
+                                setSelectedPlan(null);
+                            }}
+                            disabled={upgradeLoading}
+                        >
+                            İptal
+                        </Button>
+                        <Button
+                            onClick={handleUpgrade}
+                            disabled={upgradeLoading || !selectedPlan}
+                            variant={selectedPlan && subscription && selectedPlan.price < subscription.plan.price ? "outline" : "default"}
+                        >
+                            {upgradeLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    İşleniyor...
+                                </>
+                            ) : selectedPlan && subscription && selectedPlan.price < subscription.plan.price ? (
+                                "Normal Plana Geç"
+                            ) : (
+                                "Yükselt"
+                            )}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

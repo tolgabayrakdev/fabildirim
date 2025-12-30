@@ -3,6 +3,9 @@ import { Link } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
+import { apiUrl } from "@/lib/api"
+import { Loader2 } from "lucide-react"
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("")
@@ -11,12 +14,38 @@ export default function ForgotPassword() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        
+        if (!email) {
+            toast.error("Lütfen e-posta adresinizi girin.")
+            return
+        }
+
         setIsLoading(true)
-        // TODO: Implement forgot password logic
-        setTimeout(() => {
+
+        try {
+            const response = await fetch(apiUrl("/api/auth/forgot-password"), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ email }),
+            })
+
+            const data = await response.json()
+
+            if (response.ok && data.success) {
+                toast.success(data.message || "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.")
+                setIsSubmitted(true)
+            } else {
+                toast.error(data.error?.message || data.message || "Bir hata oluştu. Lütfen tekrar deneyin.")
+            }
+        } catch (err) {
+            console.error("Forgot password error:", err)
+            toast.error("Bir hata oluştu. Lütfen tekrar deneyin.")
+        } finally {
             setIsLoading(false)
-            setIsSubmitted(true)
-        }, 1000)
+        }
     }
 
     if (isSubmitted) {
@@ -51,13 +80,6 @@ export default function ForgotPassword() {
                     </div>
 
                     <div className="space-y-4">
-                        <Button
-                            onClick={() => setIsSubmitted(false)}
-                            variant="outline"
-                            className="w-full"
-                        >
-                            Yeni E-posta Gönder
-                        </Button>
                         <Link to="/sign-in">
                             <Button variant="ghost" className="w-full">
                                 Giriş sayfasına dön
@@ -99,7 +121,14 @@ export default function ForgotPassword() {
                         size="lg"
                         disabled={isLoading}
                     >
-                        {isLoading ? "Gönderiliyor..." : "Şifre Sıfırlama Bağlantısı Gönder"}
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Gönderiliyor...
+                            </>
+                        ) : (
+                            "Şifre Sıfırlama Bağlantısı Gönder"
+                        )}
                     </Button>
                 </form>
 
