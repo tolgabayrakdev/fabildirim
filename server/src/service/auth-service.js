@@ -62,7 +62,6 @@ export default class AuthService {
                 html: welcomeEmailHtml,
             });
         } catch (error) {
-            // Email gönderme hatası kayıt işlemini engellemez
             logger.error("Welcome email gönderilemedi:", error);
         }
     }
