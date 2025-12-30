@@ -1,4 +1,4 @@
-import { Home, LogOut, Search, Settings, User, Loader2 } from "lucide-react"
+import { Home, LogOut, Settings, User, Loader2 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router"
 import { useAuthStore } from "@/store/auth-store"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -28,17 +28,12 @@ import { cn } from "@/lib/utils"
 // Menu items.
 const items = [
   {
-    title: "Home",
+    title: "Anasayfa",
     url: "/",
     icon: Home,
   },
   {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
+    title: "Ayarlar",
     url: "/settings",
     icon: Settings,
   },
@@ -67,9 +62,14 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-lg font-semibold">
+            <div className="flex items-center gap-2">
+              <span>FABİLDİRİM</span>
+              <span className="text-xs font-normal text-muted-foreground">v0.3</span>
+            </div>
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="mt-6">
               {items.map((item) => {
                 const isActive = location.pathname === item.url || 
                   (item.url === "/" && location.pathname === "/")
