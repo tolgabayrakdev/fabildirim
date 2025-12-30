@@ -2,6 +2,7 @@ import express from "express";
 import AuthController from "../controller/auth-controller.js";
 import { schemaValidation } from "../middleware/schema-validation.js";
 import { verifyToken } from "../middleware/auth-middleware.js";
+import { authRateLimiter } from "../middleware/rate-limiter.js";
 import {
     signUpSchema,
     signInSchema,
@@ -20,13 +21,20 @@ const authController = new AuthController();
 
 router.post(
     "/register",
+    authRateLimiter,
     schemaValidation(signUpSchema),
     authController.signUp.bind(authController)
 );
-router.post("/login", schemaValidation(signInSchema), authController.signIn.bind(authController));
+router.post(
+    "/login",
+    authRateLimiter,
+    schemaValidation(signInSchema),
+    authController.signIn.bind(authController)
+);
 router.post("/logout", authController.signOut.bind(authController));
 router.post(
     "/forgot-password",
+    authRateLimiter,
     schemaValidation(forgotPasswordSchema),
     authController.forgotPassword.bind(authController)
 );

@@ -146,7 +146,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         await get().checkAuth();
         return { success: true };
       } else {
-        const errorMessage = data.message || data.error?.message || "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.";
+        const errorMessage = data.message || data.error || data.error?.message || "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.";
         set({
           loading: false,
           error: errorMessage,

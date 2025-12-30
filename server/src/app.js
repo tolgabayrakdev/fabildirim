@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import config from "./config/app-config.js";
 import logger from "./config/logger.js";
 import errorHandler from "./middleware/error-handler.js";
+import { generalRateLimiter } from "./middleware/rate-limiter.js";
 
 // api routes imports
 import authRoutes from "./routes/auth-routes.js";
@@ -41,6 +42,9 @@ app.get("/", (_req, res) => {
         version: "1.0.0",
     });
 });
+
+// Genel API rate limiter - tüm API route'ları için geçerli
+app.use(`${config.apiPrefix}`, generalRateLimiter);
 
 //api routes
 app.use(`${config.apiPrefix}/auth`, authRoutes);
