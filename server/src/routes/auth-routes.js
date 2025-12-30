@@ -60,21 +60,13 @@ router.post(
     schemaValidation(resendSmsVerificationSchema),
     authController.resendSmsVerification.bind(authController)
 );
-router.get(
-    "/me",
-    verifyToken,
-    authController.getCurrentUser.bind(authController)
-);
+router.get("/me", verifyToken, authController.getCurrentUser.bind(authController));
 router.post(
     "/change-password",
     verifyToken,
     schemaValidation(changePasswordSchema),
     authController.changePassword.bind(authController)
 );
-router.delete(
-    "/delete-account",
-    verifyToken,
-    authController.deleteAccount.bind(authController)
-);
+router.delete("/delete-account", verifyToken, authController.deleteAccount.bind(authController));
 
 export default router;

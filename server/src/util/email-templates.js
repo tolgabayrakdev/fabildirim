@@ -279,3 +279,122 @@ export function getInfoTemplate(title, message, buttonText = null, buttonLink = 
         preheader: title,
     });
 }
+
+/**
+ * Pro Plan Yükseltme Template
+ */
+export function getProPlanUpgradeTemplate(firstName, planName, price, endDate) {
+    const formattedDate = endDate
+        ? new Date(endDate).toLocaleDateString("tr-TR", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+          })
+        : "Süresiz";
+
+    const content = `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="margin: 0 0 10px 0; color: ${TEXT_COLOR}; font-size: 24px; font-weight: 600;">
+                Pro Plana Hoş Geldiniz! 🎉
+            </h2>
+            <p style="margin: 0; color: ${TEXT_SECONDARY}; font-size: 14px;">
+                Üyeliğiniz başarıyla yükseltildi
+            </p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="margin: 0 0 20px 0; color: ${TEXT_COLOR}; font-size: 16px; line-height: 1.6;">
+                Merhaba <strong>${firstName}</strong>,
+            </p>
+            <p style="margin: 0 0 20px 0; color: ${TEXT_COLOR}; font-size: 15px; line-height: 1.6;">
+                ${planName} planına geçiş yaptığınız için teşekkür ederiz! Artık tüm premium özelliklere erişebilirsiniz.
+            </p>
+        </div>
+        
+        <div style="background-color: #f4f4f5; border-left: 4px solid ${BRAND_COLOR}; padding: 20px; margin: 30px 0; border-radius: 4px;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                    <td style="padding-bottom: 12px;">
+                        <p style="margin: 0; color: ${TEXT_COLOR}; font-size: 14px; font-weight: 600;">
+                            Plan Detayları:
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-bottom: 8px;">
+                        <p style="margin: 0; color: ${TEXT_SECONDARY}; font-size: 14px;">
+                            <strong style="color: ${TEXT_COLOR};">Plan:</strong> ${planName}
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-bottom: 8px;">
+                        <p style="margin: 0; color: ${TEXT_SECONDARY}; font-size: 14px;">
+                            <strong style="color: ${TEXT_COLOR};">Fiyat:</strong> ${price} ₺
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p style="margin: 0; color: ${TEXT_SECONDARY}; font-size: 14px;">
+                            <strong style="color: ${TEXT_COLOR};">Bitiş Tarihi:</strong> ${formattedDate}
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid ${BORDER_COLOR};">
+            <p style="margin: 0; color: ${TEXT_SECONDARY}; font-size: 13px; line-height: 1.6; text-align: center;">
+                Sorularınız için bizimle iletişime geçebilirsiniz.
+            </p>
+        </div>
+    `;
+
+    return getBaseTemplate(content, {
+        title: `Pro Plan Yükseltme - ${BRAND_NAME}`,
+        preheader: `${planName} planına hoş geldiniz!`,
+    });
+}
+
+/**
+ * Normal Plan Değişikliği Template
+ */
+export function getNormalPlanChangeTemplate(firstName, planName) {
+    const content = `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="margin: 0 0 10px 0; color: ${TEXT_COLOR}; font-size: 24px; font-weight: 600;">
+                Üyelik Planınız Güncellendi
+            </h2>
+            <p style="margin: 0; color: ${TEXT_SECONDARY}; font-size: 14px;">
+                ${planName} planı ile devam ediyorsunuz
+            </p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="margin: 0 0 20px 0; color: ${TEXT_COLOR}; font-size: 16px; line-height: 1.6;">
+                Merhaba <strong>${firstName}</strong>,
+            </p>
+            <p style="margin: 0 0 20px 0; color: ${TEXT_COLOR}; font-size: 15px; line-height: 1.6;">
+                Üyeliğiniz ${planName} planına başarıyla değiştirilmiştir. ${planName} planı ile devam edebilirsiniz.
+            </p>
+        </div>
+        
+        <div style="background-color: #f4f4f5; border-left: 4px solid ${BRAND_COLOR}; padding: 20px; margin: 30px 0; border-radius: 4px;">
+            <p style="margin: 0; color: ${TEXT_COLOR}; font-size: 14px; line-height: 1.6;">
+                <strong>💡 Bilgi:</strong> İstediğiniz zaman tekrar Pro plana geçiş yapabilirsiniz. Hesap ayarlarınızdan planınızı yönetebilirsiniz.
+            </p>
+        </div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid ${BORDER_COLOR};">
+            <p style="margin: 0; color: ${TEXT_SECONDARY}; font-size: 13px; line-height: 1.6; text-align: center;">
+                Sorularınız için bizimle iletişime geçebilirsiniz.
+            </p>
+        </div>
+    `;
+
+    return getBaseTemplate(content, {
+        title: `Üyelik Planı Değişikliği - ${BRAND_NAME}`,
+        preheader: `${planName} planı ile devam ediyorsunuz`,
+    });
+}

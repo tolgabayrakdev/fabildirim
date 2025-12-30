@@ -94,16 +94,12 @@ export const verifyEmailOtpSchema = Joi.object({
         "string.email": "Geçerli bir e-posta adresi giriniz",
         "any.required": "E-posta alanı zorunludur",
     }),
-    code: Joi.string()
-        .length(6)
-        .pattern(/^\d+$/)
-        .required()
-        .messages({
-            "string.empty": "Doğrulama kodu boş bırakılamaz",
-            "string.length": "Doğrulama kodu 6 haneli olmalıdır",
-            "string.pattern.base": "Doğrulama kodu sadece rakamlardan oluşmalıdır",
-            "any.required": "Doğrulama kodu zorunludur",
-        }),
+    code: Joi.string().length(6).pattern(/^\d+$/).required().messages({
+        "string.empty": "Doğrulama kodu boş bırakılamaz",
+        "string.length": "Doğrulama kodu 6 haneli olmalıdır",
+        "string.pattern.base": "Doğrulama kodu sadece rakamlardan oluşmalıdır",
+        "any.required": "Doğrulama kodu zorunludur",
+    }),
 });
 
 export const verifySmsOtpSchema = Joi.object({
@@ -112,16 +108,12 @@ export const verifySmsOtpSchema = Joi.object({
         "string.email": "Geçerli bir e-posta adresi giriniz",
         "any.required": "E-posta alanı zorunludur",
     }),
-    code: Joi.string()
-        .length(6)
-        .pattern(/^\d+$/)
-        .required()
-        .messages({
-            "string.empty": "Doğrulama kodu boş bırakılamaz",
-            "string.length": "Doğrulama kodu 6 haneli olmalıdır",
-            "string.pattern.base": "Doğrulama kodu sadece rakamlardan oluşmalıdır",
-            "any.required": "Doğrulama kodu zorunludur",
-        }),
+    code: Joi.string().length(6).pattern(/^\d+$/).required().messages({
+        "string.empty": "Doğrulama kodu boş bırakılamaz",
+        "string.length": "Doğrulama kodu 6 haneli olmalıdır",
+        "string.pattern.base": "Doğrulama kodu sadece rakamlardan oluşmalıdır",
+        "any.required": "Doğrulama kodu zorunludur",
+    }),
 });
 
 export const resendEmailVerificationSchema = Joi.object({

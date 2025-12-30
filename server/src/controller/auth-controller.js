@@ -120,7 +120,7 @@ export default class AuthController {
         try {
             const { email, code } = req.body;
             const result = await this.authService.verifyEmailOtp(email, code);
-            
+
             // Eğer token döndüyse, cookie'ye kaydet
             if (result.accessToken && result.refreshToken) {
                 res.cookie("access_token", result.accessToken, {
@@ -152,7 +152,7 @@ export default class AuthController {
         try {
             const { email, code } = req.body;
             const result = await this.authService.verifySmsOtp(email, code);
-            
+
             // Token'ları cookie'ye kaydet
             res.cookie("access_token", result.accessToken, {
                 httpOnly: true,
@@ -220,7 +220,11 @@ export default class AuthController {
         try {
             const userId = req.user.id;
             const { currentPassword, newPassword } = req.body;
-            const result = await this.authService.changePassword(userId, currentPassword, newPassword);
+            const result = await this.authService.changePassword(
+                userId,
+                currentPassword,
+                newPassword
+            );
             res.status(200).json({
                 success: true,
                 message: result.message,
@@ -234,11 +238,11 @@ export default class AuthController {
         try {
             const userId = req.user.id;
             const result = await this.authService.deleteAccount(userId);
-            
+
             // Cookie'leri temizle
             res.clearCookie("access_token");
             res.clearCookie("refresh_token");
-            
+
             res.status(200).json({
                 success: true,
                 message: result.message,

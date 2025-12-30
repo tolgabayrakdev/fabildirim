@@ -26,7 +26,7 @@ export default class AuthRepository {
         const query = `
         INSERT INTO users (first_name, last_name, email, phone, password)
         VALUES ($1, $2, $3, $4, $5)
-        RETURNING first_name, last_name, email, phone, created_at
+        RETURNING id, first_name, last_name, email, phone, created_at
         `;
         const values = [
             userData.first_name,
@@ -63,10 +63,7 @@ export default class AuthRepository {
     async createPasswordResetToken(userId, token, expiresAt, client = null) {
         const dbClient = client || pool;
         // Önceki token'ları sil (güvenlik için)
-        await dbClient.query(
-            `DELETE FROM password_reset_tokens WHERE user_id = $1`,
-            [userId]
-        );
+        await dbClient.query(`DELETE FROM password_reset_tokens WHERE user_id = $1`, [userId]);
         // Yeni token oluştur
         const query = `
             INSERT INTO password_reset_tokens (user_id, token, expires_at)
@@ -169,20 +166,20 @@ export default class AuthRepository {
             WHERE email = $1
         `;
         const result = await dbClient.query(query, [email]);
-        
+
         if (result.rows.length === 0) {
             return { canResend: false, reason: "Kullanıcı bulunamadı." };
         }
 
         const user = result.rows[0];
-        
+
         // Eğer hiç kod gönderilmemişse, gönderebilir
         if (!user.email_verify_code_created_at) {
             return { canResend: true };
         }
 
         const secondsSince = parseFloat(user.seconds_since_last_code) || 0;
-        
+
         // Cooldown süresi geçmişse (3 dakika = 180 saniye), gönderebilir
         if (secondsSince >= cooldownSeconds) {
             return { canResend: true };
@@ -211,20 +208,20 @@ export default class AuthRepository {
             WHERE email = $1
         `;
         const result = await dbClient.query(query, [email]);
-        
+
         if (result.rows.length === 0) {
             return { canResend: false, reason: "Kullanıcı bulunamadı." };
         }
 
         const user = result.rows[0];
-        
+
         // Eğer hiç kod gönderilmemişse, gönderebilir
         if (!user.sms_verify_code_created_at) {
             return { canResend: true };
         }
 
         const secondsSince = parseFloat(user.seconds_since_last_code) || 0;
-        
+
         // Cooldown süresi geçmişse (3 dakika = 180 saniye), gönderebilir
         if (secondsSince >= cooldownSeconds) {
             return { canResend: true };
@@ -248,5 +245,23 @@ export default class AuthRepository {
         const dbClient = client || pool;
         const query = `DELETE FROM users WHERE id = $1`;
         await dbClient.query(query, [userId]);
+    }
+
+    async findPlanByName(planName, client = null) {
+        const dbClient = client || pool;
+        const query = `SELECT * FROM membership_plans WHERE name = $1`;
+        const result = await dbClient.query(query, [planName]);
+        return result.rows[0];
+    }
+
+    async createSubscription(userId, planId, client = null) {
+        const dbClient = client || pool;
+        const query = `
+            INSERT INTO user_subscriptions (user_id, plan_id, status)
+            VALUES ($1, $2, 'active')
+            RETURNING id, user_id, plan_id, start_date, status, created_at
+        `;
+        const result = await dbClient.query(query, [userId, planId]);
+        return result.rows[0];
     }
 }

@@ -1,5 +1,6 @@
 import HttpException from "../exception/http-exception.js";
 import AuthRepository from "../respository/auth-repository.js";
+import SubscriptionRepository from "../respository/subscription-repository.js";
 import { generateAccessToken, generateRefreshToken } from "../util/jwt.js";
 import { hashPassword, comparePassword } from "../util/password.js";
 import EmailService from "../util/send-email.js";
@@ -12,11 +13,14 @@ import {
 import { sendSms } from "../util/send-sms.js";
 import logger from "../config/logger.js";
 import crypto from "crypto";
+import TransactionManager from "../util/transaction-manager.js";
 
 export default class AuthService {
     constructor() {
         this.authRepository = new AuthRepository();
+        this.subscriptionRepository = new SubscriptionRepository();
         this.emailService = new EmailService();
+        this.transactionManager = new TransactionManager();
     }
 
     async signUp(userData) {
@@ -31,7 +35,26 @@ export default class AuthService {
         }
 
         userData.password = await hashPassword(userData.password);
-        const user = await this.authRepository.createUser(userData);
+
+        // Transaction içinde kullanıcı oluştur ve otomatik Normal üyelik tanımla
+        const user = await this.transactionManager.execute(async (client) => {
+            // Kullanıcı oluştur
+            const newUser = await this.authRepository.createUser(userData, client);
+
+            // Normal planı bul
+            const normalPlan = await this.authRepository.findPlanByName("Normal", client);
+            if (!normalPlan) {
+                throw new HttpException(
+                    500,
+                    "Normal üyelik planı bulunamadı. Lütfen sistem yöneticisi ile iletişime geçin."
+                );
+            }
+
+            // Otomatik olarak Normal üyelik oluştur
+            await this.authRepository.createSubscription(newUser.id, normalPlan.id, client);
+
+            return newUser;
+        });
 
         try {
             const welcomeEmailHtml = getWelcomeTemplate(user.first_name, user.last_name);
@@ -120,7 +143,9 @@ export default class AuthService {
         const user = await this.authRepository.findByEmail(email);
         if (!user) {
             // Güvenlik için: kullanıcı yoksa bile başarılı mesajı döndür
-            return { message: "Eğer bu e-posta adresi kayıtlıysa, şifre sıfırlama linki gönderildi." };
+            return {
+                message: "Eğer bu e-posta adresi kayıtlıysa, şifre sıfırlama linki gönderildi.",
+            };
         }
 
         // Güvenli token oluştur
@@ -137,14 +162,15 @@ export default class AuthService {
         try {
             // Email gönder
             const emailHtml = getPasswordResetTemplate(resetLink, 15);
-            await this.emailService.sendEmail(
-                user.email,
-                `${BRAND_NAME} Şifre Sıfırlama`,
-                { html: emailHtml }
-            );
+            await this.emailService.sendEmail(user.email, `${BRAND_NAME} Şifre Sıfırlama`, {
+                html: emailHtml,
+            });
         } catch (error) {
             logger.error("Password reset email gönderilemedi:", error);
-            throw new HttpException(500, "E-posta gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+            throw new HttpException(
+                500,
+                "E-posta gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+            );
         }
 
         return { message: "Eğer bu e-posta adresi kayıtlıysa, şifre sıfırlama linki gönderildi." };
@@ -184,7 +210,7 @@ export default class AuthService {
 
     async verifyEmailOtp(email, code) {
         const user = await this.authRepository.verifyEmailOtp(email, code);
-        
+
         if (!user) {
             throw new HttpException(400, "Geçersiz veya süresi dolmuş doğrulama kodu.");
         }
@@ -197,11 +223,11 @@ export default class AuthService {
         if (fullUser.is_sms_verified === true) {
             const accessToken = generateAccessToken({ id: fullUser.id, email: fullUser.email });
             const refreshToken = generateRefreshToken({ id: fullUser.id, email: fullUser.email });
-            return { 
+            return {
                 message: "E-posta başarıyla doğrulandı.",
                 accessToken,
                 refreshToken,
-                requiresSmsVerification: false
+                requiresSmsVerification: false,
             };
         }
 
@@ -242,7 +268,7 @@ export default class AuthService {
 
     async verifySmsOtp(email, code) {
         const user = await this.authRepository.verifySmsOtp(email, code);
-        
+
         if (!user) {
             throw new HttpException(400, "Geçersiz veya süresi dolmuş doğrulama kodu.");
         }
@@ -270,7 +296,10 @@ export default class AuthService {
         // Cooldown kontrolü (180 saniye = 3 dakika)
         const cooldownCheck = await this.authRepository.canResendEmailCode(email, 180);
         if (!cooldownCheck.canResend) {
-            throw new HttpException(429, cooldownCheck.reason || "Çok fazla istek. Lütfen daha sonra tekrar deneyin.");
+            throw new HttpException(
+                429,
+                cooldownCheck.reason || "Çok fazla istek. Lütfen daha sonra tekrar deneyin."
+            );
         }
 
         // Yeni kod oluştur
@@ -281,14 +310,15 @@ export default class AuthService {
         // Email gönder
         try {
             const emailHtml = getEmailVerificationTemplate(user.first_name, code);
-            await this.emailService.sendEmail(
-                user.email,
-                `${BRAND_NAME} E-posta Doğrulama Kodu`,
-                { html: emailHtml }
-            );
+            await this.emailService.sendEmail(user.email, `${BRAND_NAME} E-posta Doğrulama Kodu`, {
+                html: emailHtml,
+            });
         } catch (error) {
             logger.error("Email gönderilemedi:", error);
-            throw new HttpException(500, "E-posta gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+            throw new HttpException(
+                500,
+                "E-posta gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+            );
         }
 
         return { message: "Doğrulama kodu e-posta adresinize gönderildi." };
@@ -303,12 +333,18 @@ export default class AuthService {
         // Cooldown kontrolü (180 saniye = 3 dakika)
         const cooldownCheck = await this.authRepository.canResendSmsCode(email, 180);
         if (!cooldownCheck.canResend) {
-            throw new HttpException(429, cooldownCheck.reason || "Çok fazla istek. Lütfen daha sonra tekrar deneyin.");
+            throw new HttpException(
+                429,
+                cooldownCheck.reason || "Çok fazla istek. Lütfen daha sonra tekrar deneyin."
+            );
         }
 
         const phoneNumber = user.phone;
         if (!phoneNumber) {
-            throw new HttpException(400, "SMS doğrulaması için kayıtlı bir telefon numarası bulunamadı.");
+            throw new HttpException(
+                400,
+                "SMS doğrulaması için kayıtlı bir telefon numarası bulunamadı."
+            );
         }
 
         // Yeni kod oluştur
@@ -324,7 +360,10 @@ export default class AuthService {
             });
         } catch (error) {
             logger.error("SMS gönderilemedi:", error);
-            throw new HttpException(500, "SMS gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+            throw new HttpException(
+                500,
+                "SMS gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+            );
         }
 
         const maskedPhone = phoneNumber.replace(
@@ -345,6 +384,30 @@ export default class AuthService {
         if (!user) {
             throw new HttpException(404, "Kullanıcı bulunamadı.");
         }
+
+        // Abonelik bilgisini al
+        let subscription = null;
+        try {
+            const currentSubscription =
+                await this.subscriptionRepository.getCurrentSubscription(userId);
+            if (currentSubscription) {
+                subscription = {
+                    id: currentSubscription.id,
+                    plan: {
+                        id: currentSubscription.plan_id,
+                        name: currentSubscription.plan_name,
+                        price: currentSubscription.plan_price,
+                    },
+                    status: currentSubscription.status,
+                    start_date: currentSubscription.start_date,
+                    end_date: currentSubscription.end_date,
+                };
+            }
+        } catch (error) {
+            // Abonelik bulunamazsa null olarak bırak, hata fırlatma
+            logger.warn(`Subscription not found for user ${userId}`);
+        }
+
         return {
             id: user.id,
             email: user.email,
@@ -353,6 +416,7 @@ export default class AuthService {
             last_name: user.last_name,
             phone: user.phone,
             created_at: user.created_at,
+            subscription: subscription,
         };
     }
 
@@ -374,7 +438,6 @@ export default class AuthService {
             throw new HttpException(400, "Yeni şifre mevcut şifre ile aynı olamaz.");
         }
 
-        // Yeni şifreyi hashle ve güncelle
         const hashedPassword = await hashPassword(newPassword);
         await this.authRepository.updatePassword(userId, hashedPassword);
 
@@ -387,7 +450,6 @@ export default class AuthService {
             throw new HttpException(404, "Kullanıcı bulunamadı.");
         }
 
-        // Kullanıcıyı sil (CASCADE ile ilişkili veriler de silinecek)
         await this.authRepository.deleteUser(userId);
 
         return { message: "Hesabınız başarıyla silindi." };

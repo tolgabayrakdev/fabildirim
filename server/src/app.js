@@ -9,6 +9,7 @@ import errorHandler from "./middleware/error-handler.js";
 
 // api routes imports
 import authRoutes from "./routes/auth-routes.js";
+import subscriptionRoutes from "./routes/subscription-routes.js";
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.get("/", (_req, res) => {
 
 //api routes
 app.use(`${config.apiPrefix}/auth`, authRoutes);
+app.use(`${config.apiPrefix}/subscriptions`, subscriptionRoutes);
 
 app.use(errorHandler);
 
