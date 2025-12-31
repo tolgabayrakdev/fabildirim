@@ -109,7 +109,7 @@ export function AppSidebar() {
                   <SidebarMenuButton className="w-full justify-start h-auto py-2 px-2" disabled>
                     <Skeleton className="h-9 w-9 rounded-full shrink-0" />
                     <div className="flex flex-col items-start flex-1 min-w-0 ml-2 gap-1.5">
-                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-24" />
                       <Skeleton className="h-3 w-32" />
                     </div>
                   </SidebarMenuButton>
@@ -121,18 +121,18 @@ export function AppSidebar() {
                           {user?.name ? getInitials(user.name) : <User className="h-4 w-4" />}
                         </div>
                         <div className="flex flex-col items-start flex-1 min-w-0 ml-2">
-                          <div className="flex items-center gap-2 w-full">
-                            <span className="text-sm font-medium truncate text-sidebar-foreground">
+                          <div className="flex items-center gap-1.5 w-full min-w-0">
+                            <span className="text-xs font-medium truncate text-sidebar-foreground">
                               {user?.name || "Kullanıcı"}
                             </span>
                             {user?.subscription?.plan?.name === "Pro" && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30 shrink-0">
-                                <Crown className="h-2.5 w-2.5" />
+                              <span className="inline-flex items-center gap-1 px-1 py-0.5 rounded text-[9px] font-semibold bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30 shrink-0">
+                                <Crown className="h-2 w-2" />
                                 Pro
                               </span>
                             )}
                           </div>
-                          <span className="text-xs text-muted-foreground truncate w-full">
+                          <span className="text-[11px] text-muted-foreground truncate w-full">
                             {user?.email || ""}
                           </span>
                         </div>
