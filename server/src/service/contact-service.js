@@ -1,11 +1,13 @@
 import HttpException from "../exception/http-exception.js";
 import ContactRepository from "../respository/contact-repository.js";
 import ActivityLogService from "./activity-log-service.js";
+import PlanLimitService from "./plan-limit-service.js";
 
 export default class ContactService {
     constructor() {
         this.contactRepository = new ContactRepository();
         this.activityLogService = new ActivityLogService();
+        this.planLimitService = new PlanLimitService();
     }
 
     async getAllContacts(userId) {
@@ -22,6 +24,9 @@ export default class ContactService {
     }
 
     async createContact(userId, contactData) {
+        // Plan limit kontrolü
+        await this.planLimitService.validateContactCreation(userId);
+        
         const contact = await this.contactRepository.create({
             ...contactData,
             user_id: userId,

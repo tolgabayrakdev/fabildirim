@@ -214,5 +214,16 @@ export default class DebtTransactionRepository {
         const result = await dbClient.query(query, [contactId, userId]);
         return result.rows;
     }
+
+    async countByUserId(userId, client = null) {
+        const dbClient = client || pool;
+        const query = `
+            SELECT COUNT(*) as count
+            FROM debt_transactions 
+            WHERE user_id = $1
+        `;
+        const result = await dbClient.query(query, [userId]);
+        return parseInt(result.rows[0].count, 10);
+    }
 }
 

@@ -1,11 +1,19 @@
 import { useState, useEffect } from "react"
-import { AlertCircle, TrendingUp, TrendingDown, Loader2, Phone, Calendar, UserCheck, UserX, UserCog, FileText, CircleDollarSign, Clock } from "lucide-react"
+import { AlertCircle, TrendingUp, TrendingDown, Loader2, Phone, Calendar, UserCheck, UserX, UserCog, FileText, CircleDollarSign, Clock, FileDown } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { apiUrl } from "@/lib/api"
 import type { DashboardData, DebtTransaction, ActivityLog } from "@/types"
 import { toast } from "sonner"
 import { Link } from "react-router"
+import { useAuthStore } from "@/store/auth-store"
 
 export default function DashboardIndex() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
@@ -15,6 +23,46 @@ export default function DashboardIndex() {
   const [loadingUpcoming, setLoadingUpcoming] = useState(false)
   const [recentActivities, setRecentActivities] = useState<ActivityLog[]>([])
   const [loadingActivities, setLoadingActivities] = useState(false)
+  const { user } = useAuthStore()
+  
+  const isProPlan = user?.subscription?.plan?.name === "Pro"
+  
+  const handleExportPDF = async () => {
+    try {
+      const response = await fetch(apiUrl(`/api/export/dashboard?upcoming_days=${upcomingDays}`), {
+        method: "GET",
+        credentials: "include",
+      })
+      
+      if (!response.ok) {
+        toast.error("PDF oluşturulurken bir hata oluştu")
+        return
+      }
+      
+      const html = await response.text()
+      
+      // Yeni pencerede HTML'i aç
+      const printWindow = window.open("", "_blank")
+      if (!printWindow) {
+        toast.error("Popup engelleyici nedeniyle pencere açılamadı")
+        return
+      }
+      
+      printWindow.document.write(html)
+      printWindow.document.close()
+      
+      // Print dialog'unu aç (PDF'e kaydet seçeneği ile)
+      setTimeout(() => {
+        printWindow.print()
+      }, 250)
+    } catch (error) {
+      toast.error("PDF oluşturulurken bir hata oluştu")
+    }
+  }
+
+  const handleExportExcel = () => {
+    window.location.href = apiUrl(`/api/export/excel/dashboard?upcoming_days=${upcomingDays}`)
+  }
 
   const fetchDashboardData = async () => {
     try {
@@ -131,11 +179,31 @@ export default function DashboardIndex() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground mt-2 text-sm md:text-base">
-          Borç/Alacak özetiniz
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground mt-2 text-sm md:text-base">
+            Borç/Alacak özetiniz
+          </p>
+        </div>
+        {isProPlan && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full sm:w-auto">
+                <FileDown className="h-4 w-4 mr-2" />
+                Raporu Dışa Aktar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExportPDF}>
+                PDF olarak dışa aktar
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportExcel}>
+                Excel olarak dışa aktar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {/* Özet Kartları */}

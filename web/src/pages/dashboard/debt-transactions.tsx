@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Plus, Pencil, Trash2, Search, Loader2, Filter, CircleDollarSign, ChevronRight, Bell, Mail, MessageSquare } from "lucide-react"
+import { Plus, Pencil, Trash2, Search, Loader2, Filter, CircleDollarSign, ChevronRight, Bell, Mail, MessageSquare, FileDown, AlertTriangle, Crown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -29,9 +29,18 @@ import {
 } from "@/components/ui/sheet"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { apiUrl } from "@/lib/api"
 import type { DebtTransaction, Contact, Payment } from "@/types"
 import { toast } from "sonner"
+import { useAuthStore } from "@/store/auth-store"
+import { Link } from "react-router"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function DebtTransactions() {
   const [transactions, setTransactions] = useState<DebtTransaction[]>([])
@@ -68,6 +77,15 @@ export default function DebtTransactions() {
   
   // Reminder states
   const [sendingReminder, setSendingReminder] = useState<string | null>(null)
+  
+  // Usage stats
+  const { user } = useAuthStore()
+  const [usageStats, setUsageStats] = useState<{
+    plan: string
+    debtTransactions: { used: number; limit: number | null; remaining: number | null; isUnlimited: boolean }
+  } | null>(null)
+  
+  const isProPlan = user?.subscription?.plan?.name === "Pro"
 
   const fetchContacts = async () => {
     try {
@@ -118,7 +136,70 @@ export default function DebtTransactions() {
   useEffect(() => {
     fetchContacts()
     fetchTransactions()
+    fetchUsageStats()
   }, [typeFilter, statusFilter])
+
+  const fetchUsageStats = async () => {
+    try {
+      const response = await fetch(apiUrl("/api/subscriptions/usage-stats"), {
+        method: "GET",
+        credentials: "include",
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setUsageStats(data.data)
+        }
+      }
+    } catch (error) {
+      // Silent fail
+    }
+  }
+
+  const handleExportPDF = async () => {
+    try {
+      const params = new URLSearchParams()
+      if (typeFilter !== "all") params.append("type", typeFilter)
+      if (statusFilter !== "all") params.append("status", statusFilter)
+      
+      const response = await fetch(apiUrl(`/api/export/debt-transactions?${params.toString()}`), {
+        method: "GET",
+        credentials: "include",
+      })
+      
+      if (!response.ok) {
+        toast.error("PDF oluşturulurken bir hata oluştu")
+        return
+      }
+      
+      const html = await response.text()
+      
+      // Yeni pencerede HTML'i aç
+      const printWindow = window.open("", "_blank")
+      if (!printWindow) {
+        toast.error("Popup engelleyici nedeniyle pencere açılamadı")
+        return
+      }
+      
+      printWindow.document.write(html)
+      printWindow.document.close()
+      
+      // Print dialog'unu aç (PDF'e kaydet seçeneği ile)
+      setTimeout(() => {
+        printWindow.print()
+      }, 250)
+    } catch (error) {
+      toast.error("PDF oluşturulurken bir hata oluştu")
+    }
+  }
+
+  const handleExportExcel = () => {
+    const params = new URLSearchParams()
+    if (typeFilter !== "all") params.append("type", typeFilter)
+    if (statusFilter !== "all") params.append("status", statusFilter)
+    window.location.href = apiUrl(`/api/export/excel/debt-transactions?${params.toString()}`)
+  }
 
   const formatCurrency = (amount: string | number) => {
     const numAmount = typeof amount === "string" ? parseFloat(amount) : amount
@@ -426,11 +507,60 @@ export default function DebtTransactions() {
             Borç ve alacak işlemlerinizi yönetin
           </p>
         </div>
-        <Button onClick={() => handleOpenDialog()} className="w-full sm:w-auto">
-          <Plus className="h-4 w-4 mr-2" />
-          Yeni Kayıt
-        </Button>
+        <div className="flex items-center gap-2">
+          {isProPlan && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Dışa Aktar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportPDF}>
+                  PDF olarak dışa aktar
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportExcel}>
+                  Excel olarak dışa aktar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          <Button onClick={() => handleOpenDialog()} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            Yeni Kayıt
+          </Button>
+        </div>
       </div>
+
+      {/* Limit Uyarısı */}
+      {usageStats && !usageStats.debtTransactions.isUnlimited && usageStats.debtTransactions.remaining !== null && usageStats.debtTransactions.remaining <= 3 && (
+        <Alert variant={usageStats.debtTransactions.remaining === 0 ? "destructive" : "default"} className={usageStats.debtTransactions.remaining === 0 ? "" : "border-amber-500 bg-amber-50 dark:bg-amber-950/20"}>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>
+            {usageStats.debtTransactions.remaining === 0 ? "Limit doldu!" : "Limit uyarısı"}
+          </AlertTitle>
+          <AlertDescription>
+            {usageStats.debtTransactions.remaining === 0 ? (
+              <>
+                Normal plan için maksimum {usageStats.debtTransactions.limit} borç/alacak kaydı ekleyebilirsiniz.{" "}
+                <Link to="/settings" className="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+                  <Crown className="h-3 w-3" />
+                  Pro plana yükseltin
+                </Link>
+              </>
+            ) : (
+              <>
+                {usageStats.debtTransactions.remaining} borç/alacak kaydı ekleme hakkınız kaldı.{" "}
+                <Link to="/settings" className="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+                  <Crown className="h-3 w-3" />
+                  Pro plana yükseltin
+                </Link>
+              </>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
         <div className="relative flex-1 min-w-0">

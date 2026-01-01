@@ -17,6 +17,7 @@ import paymentRoutes from "./routes/payment-routes.js";
 import dashboardRoutes from "./routes/dashboard-routes.js";
 import activityLogRoutes from "./routes/activity-log-routes.js";
 import reminderRoutes from "./routes/reminder-routes.js";
+import exportRoutes from "./routes/export-routes.js";
 
 const app = express();
 
@@ -61,6 +62,7 @@ app.use(`${config.apiPrefix}/payments`, paymentRoutes);
 app.use(`${config.apiPrefix}/dashboard`, dashboardRoutes);
 app.use(`${config.apiPrefix}/activity-logs`, activityLogRoutes);
 app.use(`${config.apiPrefix}/reminders`, reminderRoutes);
+app.use(`${config.apiPrefix}/export`, exportRoutes);
 
 app.use(errorHandler);
 

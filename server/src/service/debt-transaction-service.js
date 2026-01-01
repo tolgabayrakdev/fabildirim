@@ -2,12 +2,14 @@ import HttpException from "../exception/http-exception.js";
 import DebtTransactionRepository from "../respository/debt-transaction-repository.js";
 import ContactRepository from "../respository/contact-repository.js";
 import ActivityLogService from "./activity-log-service.js";
+import PlanLimitService from "./plan-limit-service.js";
 
 export default class DebtTransactionService {
     constructor() {
         this.debtTransactionRepository = new DebtTransactionRepository();
         this.contactRepository = new ContactRepository();
         this.activityLogService = new ActivityLogService();
+        this.planLimitService = new PlanLimitService();
     }
 
     async getAllTransactions(userId, filters = {}) {
@@ -24,6 +26,9 @@ export default class DebtTransactionService {
     }
 
     async createTransaction(userId, transactionData) {
+        // Plan limit kontrolü
+        await this.planLimitService.validateDebtTransactionCreation(userId);
+        
         // Contact'ın kullanıcıya ait olduğunu kontrol et
         const contact = await this.contactRepository.findById(transactionData.contact_id, userId);
         if (!contact) {

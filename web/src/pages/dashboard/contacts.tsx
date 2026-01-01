@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Plus, Pencil, Trash2, Search, Loader2 } from "lucide-react"
+import { Plus, Pencil, Trash2, Search, Loader2, FileDown, AlertTriangle, Crown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -23,6 +23,15 @@ import { Textarea } from "@/components/ui/textarea"
 import { apiUrl } from "@/lib/api"
 import type { Contact } from "@/types"
 import { toast } from "sonner"
+import { useAuthStore } from "@/store/auth-store"
+import { Link } from "react-router"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function Contacts() {
   const [contacts, setContacts] = useState<Contact[]>([])
@@ -38,6 +47,11 @@ export default function Contacts() {
     notes: "",
   })
   const [submitting, setSubmitting] = useState(false)
+  const { user } = useAuthStore()
+  const [usageStats, setUsageStats] = useState<{
+    plan: string
+    contacts: { used: number; limit: number | null; remaining: number | null; isUnlimited: boolean }
+  } | null>(null)
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -78,7 +92,65 @@ export default function Contacts() {
 
   useEffect(() => {
     fetchContacts()
+    fetchUsageStats()
   }, [])
+
+  const fetchUsageStats = async () => {
+    try {
+      const response = await fetch(apiUrl("/api/subscriptions/usage-stats"), {
+        method: "GET",
+        credentials: "include",
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setUsageStats(data.data)
+        }
+      }
+    } catch (error) {
+      // Silent fail
+    }
+  }
+
+  const handleExportPDF = async () => {
+    try {
+      const response = await fetch(apiUrl("/api/export/contacts"), {
+        method: "GET",
+        credentials: "include",
+      })
+      
+      if (!response.ok) {
+        toast.error("PDF oluşturulurken bir hata oluştu")
+        return
+      }
+      
+      const html = await response.text()
+      
+      // Yeni pencerede HTML'i aç
+      const printWindow = window.open("", "_blank")
+      if (!printWindow) {
+        toast.error("Popup engelleyici nedeniyle pencere açılamadı")
+        return
+      }
+      
+      printWindow.document.write(html)
+      printWindow.document.close()
+      
+      // Print dialog'unu aç (PDF'e kaydet seçeneği ile)
+      setTimeout(() => {
+        printWindow.print()
+      }, 250)
+    } catch (error) {
+      toast.error("PDF oluşturulurken bir hata oluştu")
+    }
+  }
+
+  const handleExportExcel = () => {
+    window.location.href = apiUrl("/api/export/excel/contacts")
+  }
+
+  const isProPlan = user?.subscription?.plan?.name === "Pro"
 
   const handleOpenDialog = (contact?: Contact) => {
     if (contact) {
@@ -201,11 +273,60 @@ export default function Contacts() {
             Borç/alacak takibi yaptığınız kişi ve firmaları yönetin
           </p>
         </div>
-        <Button onClick={() => handleOpenDialog()} className="w-full sm:w-auto">
-          <Plus className="h-4 w-4 mr-2" />
-          Yeni Kişi/Firma
-        </Button>
+        <div className="flex items-center gap-2">
+          {isProPlan && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Dışa Aktar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportPDF}>
+                  PDF olarak dışa aktar
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportExcel}>
+                  Excel olarak dışa aktar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          <Button onClick={() => handleOpenDialog()} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            Yeni Kişi/Firma
+          </Button>
+        </div>
       </div>
+
+      {/* Limit Uyarısı */}
+      {usageStats && !usageStats.contacts.isUnlimited && usageStats.contacts.remaining !== null && usageStats.contacts.remaining <= 3 && (
+        <Alert variant={usageStats.contacts.remaining === 0 ? "destructive" : "default"} className={usageStats.contacts.remaining === 0 ? "" : "border-amber-500 bg-amber-50 dark:bg-amber-950/20"}>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>
+            {usageStats.contacts.remaining === 0 ? "Limit doldu!" : "Limit uyarısı"}
+          </AlertTitle>
+          <AlertDescription>
+            {usageStats.contacts.remaining === 0 ? (
+              <>
+                Normal plan için maksimum {usageStats.contacts.limit} kişi/firma ekleyebilirsiniz.{" "}
+                <Link to="/settings" className="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+                  <Crown className="h-3 w-3" />
+                  Pro plana yükseltin
+                </Link>
+              </>
+            ) : (
+              <>
+                {usageStats.contacts.remaining} kişi/firma ekleme hakkınız kaldı.{" "}
+                <Link to="/settings" className="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+                  <Crown className="h-3 w-3" />
+                  Pro plana yükseltin
+                </Link>
+              </>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">

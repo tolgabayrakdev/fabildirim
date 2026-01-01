@@ -72,5 +72,16 @@ export default class ContactRepository {
         const result = await dbClient.query(query, [id, userId]);
         return result.rows[0];
     }
+
+    async countByUserId(userId, client = null) {
+        const dbClient = client || pool;
+        const query = `
+            SELECT COUNT(*) as count
+            FROM contacts 
+            WHERE user_id = $1
+        `;
+        const result = await dbClient.query(query, [userId]);
+        return parseInt(result.rows[0].count, 10);
+    }
 }
 

@@ -1,11 +1,13 @@
 import express from "express";
 import SubscriptionController from "../controller/subscription-controller.js";
+import PlanLimitController from "../controller/plan-limit-controller.js";
 import { schemaValidation } from "../middleware/schema-validation.js";
 import { verifyToken } from "../middleware/auth-middleware.js";
 import { upgradeSubscriptionSchema } from "../schema/subscription-schema.js";
 
 const router = express.Router();
 const subscriptionController = new SubscriptionController();
+const planLimitController = new PlanLimitController();
 
 // Mevcut üyeliği getir
 router.get(
@@ -23,6 +25,13 @@ router.post(
     verifyToken,
     schemaValidation(upgradeSubscriptionSchema),
     subscriptionController.upgradeSubscription.bind(subscriptionController)
+);
+
+// Kullanım istatistikleri
+router.get(
+    "/usage-stats",
+    verifyToken,
+    planLimitController.getUsageStats.bind(planLimitController)
 );
 
 export default router;
