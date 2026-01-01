@@ -1,5 +1,5 @@
-export const BRAND_NAME = "Fabildirim";
-export const BRAND_URL = "https://fabildirim.com";
+export const BRAND_NAME = "Vanpara";
+export const BRAND_URL = "https://vanpara.com";
 export const BRAND_TAGLINE = "None";
 export const BRAND_DESCRIPTION = "None";
 
@@ -396,5 +396,71 @@ export function getNormalPlanChangeTemplate(firstName, planName) {
     return getBaseTemplate(content, {
         title: `Üyelik Planı Değişikliği - ${BRAND_NAME}`,
         preheader: `${planName} planı ile devam ediyorsunuz`,
+    });
+}
+
+/**
+ * Borç/Alacak Hatırlatma Template
+ */
+export function getReminderTemplate(contactName, amount, dueDate, transactionType = "receivable") {
+    const formattedAmount = new Intl.NumberFormat("tr-TR", {
+        style: "currency",
+        currency: "TRY",
+        minimumFractionDigits: 2,
+    }).format(amount);
+
+    const formattedDate = new Date(dueDate).toLocaleDateString("tr-TR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    });
+
+    const isReceivable = transactionType === "receivable";
+    const typeLabel = isReceivable ? "Alacak" : "Borç";
+    const typeColor = isReceivable ? "#22c55e" : "#ef4444";
+
+    const content = `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="margin: 0 0 10px 0; color: ${TEXT_COLOR}; font-size: 24px; font-weight: 600;">
+                ${typeLabel} Hatırlatması
+            </h2>
+            <p style="margin: 0; color: ${TEXT_SECONDARY}; font-size: 14px;">
+                Vadesi yaklaşan ödeme hatırlatması
+            </p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="margin: 0 0 20px 0; color: ${TEXT_COLOR}; font-size: 16px; line-height: 1.6;">
+                Sayın <strong>${contactName}</strong>,
+            </p>
+            <p style="margin: 0 0 30px 0; color: ${TEXT_COLOR}; font-size: 15px; line-height: 1.6;">
+                ${formattedDate} tarihine kadar olan <strong>${formattedAmount}</strong> tutarındaki ${typeLabel.toLowerCase()} ödemenizi rica ederiz.
+            </p>
+            
+            <!-- Amount Box -->
+            <div style="background: linear-gradient(135deg, rgba(82, 82, 91, 0.1) 0%, rgba(63, 63, 70, 0.1) 100%); border: 2px solid ${typeColor}; border-radius: 12px; padding: 25px; margin: 30px 0; display: inline-block;">
+                <div style="font-size: 32px; font-weight: 700; color: ${typeColor};">
+                    ${formattedAmount}
+                </div>
+                <div style="margin-top: 10px; color: ${TEXT_SECONDARY}; font-size: 14px;">
+                    Vade Tarihi: ${formattedDate}
+                </div>
+            </div>
+            
+            <p style="margin: 25px 0 0 0; color: ${TEXT_SECONDARY}; font-size: 13px; line-height: 1.6;">
+                Ödemenizi zamanında yapmanızı rica ederiz.
+            </p>
+        </div>
+        
+        <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid ${BORDER_COLOR};">
+            <p style="margin: 0; color: ${TEXT_SECONDARY}; font-size: 12px; line-height: 1.6; text-align: center;">
+                Bu bir otomatik hatırlatma mesajıdır. Sorularınız için bizimle iletişime geçebilirsiniz.
+            </p>
+        </div>
+    `;
+
+    return getBaseTemplate(content, {
+        title: `${typeLabel} Hatırlatması - ${BRAND_NAME}`,
+        preheader: `${formattedDate} tarihine kadar ${formattedAmount} ödemenizi rica ederiz`,
     });
 }

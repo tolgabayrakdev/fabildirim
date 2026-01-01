@@ -8,7 +8,9 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import { useAuthStore } from "@/store/auth-store";
 import { apiUrl } from "@/lib/api";
-import { Loader2, Crown, Check } from "lucide-react";
+import { Loader2, Crown, Check, Bell, Mail, MessageSquare } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 
 interface Subscription {
     id: string;
@@ -54,6 +56,16 @@ export default function Settings() {
     const [deleteConfirmText, setDeleteConfirmText] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
     
+    // Bildirim ayarları state
+    const [reminderSettings, setReminderSettings] = useState({
+        remind_30_days: true,
+        remind_7_days: true,
+        remind_3_days: true,
+        remind_on_due_date: true,
+    });
+    const [reminderSettingsLoading, setReminderSettingsLoading] = useState(true);
+    const [reminderSettingsSaving, setReminderSettingsSaving] = useState(false);
+    
     // Abonelik bilgilerini yükle
     useEffect(() => {
         const fetchSubscriptionData = async () => {
@@ -93,6 +105,71 @@ export default function Settings() {
         
         fetchSubscriptionData();
     }, []);
+    
+    // Bildirim ayarlarını yükle
+    useEffect(() => {
+        const fetchReminderSettings = async () => {
+            setReminderSettingsLoading(true);
+            try {
+                const response = await fetch(apiUrl("/api/reminders/settings"), {
+                    method: "GET",
+                    credentials: "include",
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        setReminderSettings({
+                            remind_30_days: data.data.remind_30_days ?? true,
+                            remind_7_days: data.data.remind_7_days ?? true,
+                            remind_3_days: data.data.remind_3_days ?? true,
+                            remind_on_due_date: data.data.remind_on_due_date ?? true,
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Reminder settings fetch error:", err);
+            } finally {
+                setReminderSettingsLoading(false);
+            }
+        };
+        
+        fetchReminderSettings();
+    }, []);
+    
+    const handleReminderSettingsChange = async (key: string, value: boolean) => {
+        const newSettings = { ...reminderSettings, [key]: value };
+        setReminderSettings(newSettings);
+        
+        setReminderSettingsSaving(true);
+        try {
+            const response = await fetch(apiUrl("/api/reminders/settings"), {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(newSettings),
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                toast.success("Bildirim ayarları güncellendi.");
+            } else {
+                toast.error(data.message || "Bildirim ayarları güncellenemedi.");
+                // Hata durumunda eski değere geri dön
+                setReminderSettings(reminderSettings);
+            }
+        } catch (err) {
+            console.error("Reminder settings update error:", err);
+            toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+            // Hata durumunda eski değere geri dön
+            setReminderSettings(reminderSettings);
+        } finally {
+            setReminderSettingsSaving(false);
+        }
+    };
     
     const handleUpgrade = async () => {
         if (!selectedPlan) return;
@@ -246,7 +323,7 @@ export default function Settings() {
                         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
                 ) : subscription ? (
-                    <div className="grid gap-6 md:grid-cols-[1fr_auto_1fr]">
+                    <div className="grid gap-6 grid-cols-1 md:grid-cols-[1fr_auto_1fr]">
                         {/* Mevcut Plan Bilgileri */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
@@ -281,7 +358,7 @@ export default function Settings() {
                         
                         {/* Mevcut Planlar */}
                         {plans.length > 0 && (
-                            <div className="space-y-4 md:col-start-3">
+                            <div className="space-y-4 md:col-start-3 col-start-1">
                                 <h3 className="text-lg font-semibold">Mevcut Planlar</h3>
                                 <div className="space-y-3">
                                     {plans.map((plan) => {
@@ -353,6 +430,121 @@ export default function Settings() {
                             Abonelik bilgisi bulunamadı.
                         </p>
                     </div>
+                )}
+            </div>
+            
+            <Separator />
+            
+            {/* Bildirim Ayarları */}
+            <div className="space-y-6">
+                <div>
+                    <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                        <Bell className="h-5 w-5" />
+                        Bildirim Ayarları
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                        Vadesi yaklaşan alacaklar için otomatik bildirim ayarlarınızı yönetin.
+                    </p>
+                </div>
+                
+                {reminderSettingsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                ) : (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Otomatik Hatırlatmalar</CardTitle>
+                            <CardDescription>
+                                Vadesi yaklaşan alacaklar için otomatik olarak e-posta ve SMS gönderilir.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4 text-muted-foreground" />
+                                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            30 Gün Önce Hatırlat
+                                        </label>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Vadesinden 30 gün önce bildirim gönder
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={reminderSettings.remind_30_days}
+                                    onCheckedChange={(checked) =>
+                                        handleReminderSettingsChange("remind_30_days", checked)
+                                    }
+                                    disabled={reminderSettingsSaving}
+                                />
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4 text-muted-foreground" />
+                                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            7 Gün Önce Hatırlat
+                                        </label>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Vadesinden 7 gün önce bildirim gönder
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={reminderSettings.remind_7_days}
+                                    onCheckedChange={(checked) =>
+                                        handleReminderSettingsChange("remind_7_days", checked)
+                                    }
+                                    disabled={reminderSettingsSaving}
+                                />
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <div className="flex items-center gap-2">
+                                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            3 Gün Önce Hatırlat
+                                        </label>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Vadesinden 3 gün önce bildirim gönder
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={reminderSettings.remind_3_days}
+                                    onCheckedChange={(checked) =>
+                                        handleReminderSettingsChange("remind_3_days", checked)
+                                    }
+                                    disabled={reminderSettingsSaving}
+                                />
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <div className="flex items-center gap-2">
+                                        <Bell className="h-4 w-4 text-muted-foreground" />
+                                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            Vade Günü Hatırlat
+                                        </label>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Vade günü bildirim gönder
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={reminderSettings.remind_on_due_date}
+                                    onCheckedChange={(checked) =>
+                                        handleReminderSettingsChange("remind_on_due_date", checked)
+                                    }
+                                    disabled={reminderSettingsSaving}
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
                 )}
             </div>
             

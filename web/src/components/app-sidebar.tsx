@@ -1,4 +1,4 @@
-import { Home, LogOut, Settings, User, Loader2, Crown } from "lucide-react"
+import { LayoutDashboard, LogOut, Settings, User, Loader2, Crown, Building2, FileText, BarChart3 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router"
 import { useAuthStore } from "@/store/auth-store"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -30,12 +30,22 @@ const items = [
   {
     title: "Anasayfa",
     url: "/",
-    icon: Home,
+    icon: LayoutDashboard,
   },
   {
-    title: "Ayarlar",
-    url: "/settings",
-    icon: Settings,
+    title: "Kişi/Firmalar",
+    url: "/contacts",
+    icon: Building2,
+  },
+  {
+    title: "Borç/Alacak",
+    url: "/debt-transactions",
+    icon: FileText,
+  },
+  {
+    title: "İstatistikler",
+    url: "/statistics",
+    icon: BarChart3,
   },
 ]
 
@@ -64,7 +74,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-semibold">
             <div className="flex items-center gap-2">
-              <span>FABİLDİRİM</span>
+              <span>VANPARA</span>
               <span className="text-xs font-normal text-muted-foreground">v0.3</span>
             </div>
           </SidebarGroupLabel>
@@ -83,8 +93,8 @@ export function AppSidebar() {
                       )}
                     >
                       <Link to={item.url} className="flex items-center gap-3 w-full">
-                        <item.icon className={cn("h-5 w-5", isActive && "!text-primary-foreground")} />
-                        <span className={cn("text-[15px]", isActive && "!text-primary-foreground")}>{item.title}</span>
+                        <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive && "!text-primary-foreground")} />
+                        <span className={cn("text-[15px] font-medium", isActive && "!text-primary-foreground")}>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

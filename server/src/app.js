@@ -11,6 +11,13 @@ import { generalRateLimiter } from "./middleware/rate-limiter.js";
 // api routes imports
 import authRoutes from "./routes/auth-routes.js";
 import subscriptionRoutes from "./routes/subscription-routes.js";
+import contactRoutes from "./routes/contact-routes.js";
+import debtTransactionRoutes from "./routes/debt-transaction-routes.js";
+import paymentRoutes from "./routes/payment-routes.js";
+import dashboardRoutes from "./routes/dashboard-routes.js";
+import activityLogRoutes from "./routes/activity-log-routes.js";
+import reminderRoutes from "./routes/reminder-routes.js";
+import exportRoutes from "./routes/export-routes.js";
 
 const app = express();
 
@@ -38,7 +45,7 @@ app.use(cookieParser());
 
 app.get("/", (_req, res) => {
     res.json({
-        message: "FaBildirim API",
+        message: "Vanpara API",
         version: "1.0.0",
     });
 });
@@ -49,6 +56,13 @@ app.use(`${config.apiPrefix}`, generalRateLimiter);
 //api routes
 app.use(`${config.apiPrefix}/auth`, authRoutes);
 app.use(`${config.apiPrefix}/subscriptions`, subscriptionRoutes);
+app.use(`${config.apiPrefix}/contacts`, contactRoutes);
+app.use(`${config.apiPrefix}/debt-transactions`, debtTransactionRoutes);
+app.use(`${config.apiPrefix}/payments`, paymentRoutes);
+app.use(`${config.apiPrefix}/dashboard`, dashboardRoutes);
+app.use(`${config.apiPrefix}/activity-logs`, activityLogRoutes);
+app.use(`${config.apiPrefix}/reminders`, reminderRoutes);
+app.use(`${config.apiPrefix}/export`, exportRoutes);
 
 app.use(errorHandler);
 

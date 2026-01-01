@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate } from "react-router"
-import { Eye, EyeOff, Bell, CheckCircle, Clock, TrendingUp, Mail, Phone, Loader2 } from "lucide-react"
+import { Eye, EyeOff, Wallet, CheckCircle, Clock, TrendingUp, Mail, Phone, Loader2, Receipt } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -153,9 +153,9 @@ export default function SignIn() {
     if (checkingAuth) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <div className="flex flex-col items-center gap-3">
+                    <div className="flex flex-col items-center gap-3">
                     <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center animate-pulse">
-                        <Bell className="h-6 w-6 text-primary" />
+                        <Wallet className="h-6 w-6 text-primary" />
                     </div>
                     <div className="text-muted-foreground">Yükleniyor...</div>
                 </div>
@@ -165,18 +165,18 @@ export default function SignIn() {
 
     return (
         <div className="min-h-screen flex">
-            {/* Sol Taraf - Fabildirim İçeriği */}
+            {/* Sol Taraf - Vanpara İçeriği */}
             <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-12">
                 <div className="max-w-md space-y-8">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="p-3 rounded-lg bg-primary/10">
-                                <Bell className="h-8 w-8 text-primary" />
+                                <Wallet className="h-8 w-8 text-primary" />
                             </div>
-                            <h2 className="text-4xl font-bold tracking-tight">Fabildirim</h2>
+                            <h2 className="text-4xl font-bold tracking-tight">Vanpara</h2>
                         </div>
                         <p className="text-xl text-muted-foreground">
-                            {step === "login" && "Hoş geldiniz! Hesabınıza giriş yaparak bildirimlerinizi yönetmeye devam edin"}
+                            {step === "login" && "Hoş geldiniz! Hesabınıza giriş yaparak borç ve alacaklarınızı yönetmeye devam edin"}
                             {step === "emailOtp" && "E-posta adresinizi doğrulayın"}
                             {step === "smsOtp" && "Telefon numaranızı doğrulayın"}
                         </p>
@@ -209,12 +209,12 @@ export default function SignIn() {
 
                         <div className="flex items-start gap-4">
                             <div className="p-2 rounded-md bg-primary/10 mt-1">
-                                <TrendingUp className="h-5 w-5 text-primary" />
+                                <Receipt className="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                                <h3 className="font-semibold mb-1">Kolay Yönetim</h3>
+                                <h3 className="font-semibold mb-1">Borç/Alacak Yönetimi</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    Bildirim tercihlerinizi düzenleyin ve istediğiniz zaman bilgilendirilin
+                                    Kişi ve firmalarınızın borç/alacaklarını kolayca takip edin ve ödemeleri yönetin
                                 </p>
                             </div>
                         </div>

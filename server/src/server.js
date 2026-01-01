@@ -2,6 +2,7 @@ import app from "./app.js";
 import pool from "./config/database.js";
 import logger from "./config/logger.js";
 import config from "./config/app-config.js";
+import ReminderScheduler from "./service/reminder-scheduler.js";
 
 const PORT = config.port || 1234;
 
@@ -24,10 +25,22 @@ const PORT = config.port || 1234;
             ].join("\n");
 
             logger.info(serverInfo);
+
+            // Start reminder scheduler
+            const reminderScheduler = new ReminderScheduler();
+            reminderScheduler.start();
+
+            // Store scheduler reference for graceful shutdown
+            server.reminderScheduler = reminderScheduler;
         });
 
         const gracefulShutdown = (signal) => {
             logger.info(`Received ${signal}, shutting down gracefully...`);
+
+            // Stop reminder scheduler
+            if (server.reminderScheduler) {
+                server.reminderScheduler.stop();
+            }
 
             server.close(() => {
                 logger.info("HTTP server closed");
