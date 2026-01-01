@@ -43,7 +43,7 @@ app.use(cookieParser());
 
 app.get("/", (_req, res) => {
     res.json({
-        message: "Nazpara API",
+        message: "Vanpara API",
         version: "1.0.0",
     });
 });

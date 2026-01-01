@@ -1,5 +1,5 @@
-export const BRAND_NAME = "Nazpara";
-export const BRAND_URL = "https://nazpara.com";
+export const BRAND_NAME = "Vanpara";
+export const BRAND_URL = "https://vanpara.com";
 export const BRAND_TAGLINE = "None";
 export const BRAND_DESCRIPTION = "None";
 

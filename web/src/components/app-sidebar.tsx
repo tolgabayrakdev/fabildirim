@@ -69,7 +69,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-semibold">
             <div className="flex items-center gap-2">
-              <span>NAZPARA</span>
+              <span>VANPARA</span>
               <span className="text-xs font-normal text-muted-foreground">v0.3</span>
             </div>
           </SidebarGroupLabel>

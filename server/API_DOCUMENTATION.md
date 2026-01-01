@@ -1,4 +1,4 @@
-# Nazpara API Dokümantasyonu
+# Vanpara API Dokümantasyonu
 
 Borç/Alacak Takip Yazılımı - Backend API Dokümantasyonu
 

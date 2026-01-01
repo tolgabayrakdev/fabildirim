@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router"
-import { Eye, EyeOff, Bell, Zap, Shield, Sparkles, CheckCircle, Loader2 } from "lucide-react"
+import { Eye, EyeOff, Wallet, Zap, Shield, TrendingUp, CheckCircle, Loader2, Receipt } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -105,7 +105,7 @@ export default function SignUp() {
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="flex flex-col items-center gap-3">
                     <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center animate-pulse">
-                        <Bell className="h-6 w-6 text-primary" />
+                        <Wallet className="h-6 w-6 text-primary" />
                     </div>
                     <div className="text-muted-foreground">Yükleniyor...</div>
                 </div>
@@ -146,18 +146,18 @@ export default function SignUp() {
 
     return (
         <div className="min-h-screen flex">
-            {/* Sol Taraf - Nazpara İçeriği (Kayıt) */}
+            {/* Sol Taraf - Vanpara İçeriği (Kayıt) */}
             <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-12">
                 <div className="max-w-md space-y-8">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="p-3 rounded-lg bg-primary/10">
-                                <Bell className="h-8 w-8 text-primary" />
+                                <Wallet className="h-8 w-8 text-primary" />
                             </div>
-                            <h2 className="text-4xl font-bold tracking-tight">Nazpara</h2>
+                            <h2 className="text-4xl font-bold tracking-tight">Vanpara</h2>
                         </div>
                         <p className="text-xl text-muted-foreground">
-                            Kayıt olun ve bildirimlerinizi yönetmeye hemen başlayın
+                            Kayıt olun ve borç/alacak takibinize hemen başlayın
                         </p>
                     </div>
 
@@ -169,7 +169,7 @@ export default function SignUp() {
                             <div>
                                 <h3 className="font-semibold mb-1">Hemen Başla</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    Kolay ve hızlı kayıt ile dakikalar içinde bildirimlerinizi yönetmeye başlayın
+                                    Kolay ve hızlı kayıt ile dakikalar içinde borç ve alacaklarınızı takip etmeye başlayın
                                 </p>
                             </div>
                         </div>
@@ -188,12 +188,12 @@ export default function SignUp() {
 
                         <div className="flex items-start gap-4">
                             <div className="p-2 rounded-md bg-primary/10 mt-1">
-                                <Sparkles className="h-5 w-5 text-primary" />
+                                <TrendingUp className="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                                <h3 className="font-semibold mb-1">Akıllı Bildirimler</h3>
+                                <h3 className="font-semibold mb-1">Detaylı Raporlama</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    Özelleştirilebilir bildirimler ile istediğiniz zaman, istediğiniz şekilde bilgilendirilin
+                                    Toplam alacak, borç ve net pozisyonunuzu görüntüleyin, vade takibi yapın
                                 </p>
                             </div>
                         </div>
