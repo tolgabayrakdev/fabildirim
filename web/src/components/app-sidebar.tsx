@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, Settings, User, Loader2, Crown, Building2, FileText } from "lucide-react"
+import { LayoutDashboard, LogOut, Settings, User, Loader2, Crown, Building2, FileText, BarChart3 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router"
 import { useAuthStore } from "@/store/auth-store"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -41,6 +41,11 @@ const items = [
     title: "Borç/Alacak",
     url: "/debt-transactions",
     icon: FileText,
+  },
+  {
+    title: "İstatistikler",
+    url: "/statistics",
+    icon: BarChart3,
   },
 ]
 

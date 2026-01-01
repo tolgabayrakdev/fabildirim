@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Plus, Pencil, Trash2, Search, Loader2, Filter, CircleDollarSign, ChevronRight } from "lucide-react"
+import { Plus, Pencil, Trash2, Search, Loader2, Filter, CircleDollarSign, ChevronRight, Bell, Mail, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -65,6 +65,9 @@ export default function DebtTransactions() {
     description: "",
   })
   const [submittingPayment, setSubmittingPayment] = useState(false)
+  
+  // Reminder states
+  const [sendingReminder, setSendingReminder] = useState<string | null>(null)
 
   const fetchContacts = async () => {
     try {
@@ -335,6 +338,54 @@ export default function DebtTransactions() {
     }
   }
 
+  const handleSendReminder = async (transactionId: string) => {
+    if (!confirm("Bu işlem için bildirim göndermek istediğinize emin misiniz?")) {
+      return
+    }
+
+    setSendingReminder(transactionId)
+    try {
+      const response = await fetch(apiUrl(`/api/reminders/send/${transactionId}`), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          send_email: true,
+          send_sms: true,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        const results = data.data
+        let message = "Bildirim gönderildi: "
+        const parts = []
+        if (results.email?.success) parts.push("E-posta")
+        if (results.sms?.success) parts.push("SMS")
+        if (parts.length > 0) {
+          message += parts.join(" ve ")
+        } else {
+          message = "Bildirim gönderilemedi. Lütfen iletişim bilgilerini kontrol edin."
+        }
+        
+        if (results.errors.length > 0) {
+          toast.warning(message + ". Bazı bildirimler gönderilemedi.")
+        } else {
+          toast.success(message)
+        }
+      } else {
+        toast.error(data.message || "Bildirim gönderilemedi")
+      }
+    } catch (error) {
+      toast.error("Bir hata oluştu")
+    } finally {
+      setSendingReminder(null)
+    }
+  }
+
   const handleDeletePayment = async (paymentId: string) => {
     if (!confirm("Bu ödemeyi silmek istediğinize emin misiniz?")) {
       return
@@ -478,6 +529,22 @@ export default function DebtTransactions() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {transaction.type === "receivable" && transaction.status === "active" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleSendReminder(transaction.id)}
+                              disabled={sendingReminder === transaction.id}
+                              className="text-xs"
+                              title="Bildirim Gönder"
+                            >
+                              {sendingReminder === transaction.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Bell className="h-3 w-3" />
+                              )}
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
@@ -587,16 +654,40 @@ export default function DebtTransactions() {
                       <span>{formatDate(transaction.due_date)}</span>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleOpenPaymentSheet(transaction)}
-                    disabled={transaction.status === "closed"}
-                    className="w-full text-xs"
-                  >
-                    Ödemeler
-                    <ChevronRight className="h-3 w-3 ml-1" />
-                  </Button>
+                  <div className="flex gap-2">
+                    {transaction.type === "receivable" && transaction.status === "active" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSendReminder(transaction.id)}
+                        disabled={sendingReminder === transaction.id}
+                        className="flex-1 text-xs"
+                        title="Bildirim Gönder"
+                      >
+                        {sendingReminder === transaction.id ? (
+                          <>
+                            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                            Gönderiliyor...
+                          </>
+                        ) : (
+                          <>
+                            <Bell className="h-3 w-3 mr-1" />
+                            Bildirim
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenPaymentSheet(transaction)}
+                      disabled={transaction.status === "closed"}
+                      className="flex-1 text-xs"
+                    >
+                      Ödemeler
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
                 </div>
               ))
             )}
