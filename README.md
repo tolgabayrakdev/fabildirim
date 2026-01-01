@@ -1,1 +1,3 @@
-# fabildirim project
+# nazpara project
+
+Borç / Alacak Takip Yazılımı

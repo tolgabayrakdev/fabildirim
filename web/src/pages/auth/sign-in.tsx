@@ -165,7 +165,7 @@ export default function SignIn() {
 
     return (
         <div className="min-h-screen flex">
-            {/* Sol Taraf - Fabildirim İçeriği */}
+            {/* Sol Taraf - Nazpara İçeriği */}
             <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-12">
                 <div className="max-w-md space-y-8">
                     <div className="space-y-4">
@@ -173,7 +173,7 @@ export default function SignIn() {
                             <div className="p-3 rounded-lg bg-primary/10">
                                 <Bell className="h-8 w-8 text-primary" />
                             </div>
-                            <h2 className="text-4xl font-bold tracking-tight">Fabildirim</h2>
+                            <h2 className="text-4xl font-bold tracking-tight">Nazpara</h2>
                         </div>
                         <p className="text-xl text-muted-foreground">
                             {step === "login" && "Hoş geldiniz! Hesabınıza giriş yaparak bildirimlerinizi yönetmeye devam edin"}

@@ -246,7 +246,7 @@ export default function Settings() {
                         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
                 ) : subscription ? (
-                    <div className="grid gap-6 md:grid-cols-[1fr_auto_1fr]">
+                    <div className="grid gap-6 grid-cols-1 md:grid-cols-[1fr_auto_1fr]">
                         {/* Mevcut Plan Bilgileri */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
@@ -281,7 +281,7 @@ export default function Settings() {
                         
                         {/* Mevcut Planlar */}
                         {plans.length > 0 && (
-                            <div className="space-y-4 md:col-start-3">
+                            <div className="space-y-4 md:col-start-3 col-start-1">
                                 <h3 className="text-lg font-semibold">Mevcut Planlar</h3>
                                 <div className="space-y-3">
                                     {plans.map((plan) => {

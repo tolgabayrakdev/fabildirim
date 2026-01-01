@@ -1,10 +1,10 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: fa
+    container_name: nazpara_db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: fa
+      POSTGRES_DB: nazpara
     ports:
       - "5432:5432"
